@@ -28,7 +28,7 @@ Shotgun will automatically read in and `require()` all node modules in the speci
 
 Shotgun aims to make it extremely easy to write simple command modules. A Shotgun command module must expose 2 properties and 2 functions.
 
-    // shotgun_commands/echo/indjex.js
+    // shotgun_commands/echo/index.js
 
     // options is an array of available parameters that can be specified as arguments to the command.
     exports.options = [
