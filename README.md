@@ -55,7 +55,7 @@ Shotgun aims to make it extremely easy to write simple command modules. A Shotgu
     };
         
     // the invoke function is where the command logic will go.
-    exports.invoke = function (res, args) {
+    exports.invoke = function (res, args, locals) {
         var iterations = args.iterations || 1;
         for (var count = 0; count < iterations; count++) {
             res.writeLine(args.message);
