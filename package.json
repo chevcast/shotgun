@@ -1,0 +1,30 @@
+{
+  "name": "ShotgunShell",
+  "version": "0.0.0",
+  "description": "test descript",
+  "main": "index.js",
+  "dependencies": {
+    "optimist": "~0.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Chevex/ShotgunShell.git"
+  },
+  "keywords": [
+    "command",
+    "line",
+    "cli",
+    "shell",
+    "shotgun",
+    "terminal",
+    "prompt"
+  ],
+  "author": "Alex Ford",
+  "license": "Apache",
+  "readmeFilename": "README.md",
+  "gitHead": "812d49a1ae47cf60c945e14b0bc06542dc940d65"
+}
