@@ -24,7 +24,7 @@ Shotgun will automatically read in and `require()` all node modules in the speci
 
 ---
 
-## Creating Shotgun command modules
+## Creating a Shotgun command module
 
 Shotgun aims to make it extremely easy to write simple command modules. A Shotgun command module must expose 2 properties and 2 functions.
 
