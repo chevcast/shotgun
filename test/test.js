@@ -6,8 +6,8 @@ describe('Shell', function() {
 
 	describe('Result Object', function() {
 		it('should return the options object passed into execute.', function() {
-			var options = { something: true };
-			var result = shell.execute('test', options);
+			var options = { something: true },
+				result = shell.execute('test', options);
 			result.should.equal(options);
 			result.should.have.property('something', true);
 		});

@@ -41,7 +41,6 @@ Shotgun aims to make it extremely easy to write simple command modules. A Shotgu
 			name: 'iterations', // the name of the option.
 			option: 'i,iterations', // comma-separated list of aliases.
 			description: 'Reprints the message for the specified number of iterations.', // a description of what the parameter does.
-			type: 'bit', // bit, optionalValue, requiredValue
 			validate: '\d+' // Regex or function.
 		}
 	];
