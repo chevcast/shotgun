@@ -14,7 +14,7 @@ function parseString(str) {
 }
 
 var optimist = require('optimist');
-var result = optimist(args)
+var result = optimist(process.argv)
 	.usage('echo [-m <message>]')
 	.options('m', {
 		demand: true,
