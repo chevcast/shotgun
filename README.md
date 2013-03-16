@@ -48,7 +48,7 @@ Command modules may also expose any of three other properties.
 	// Options is an object containing a comprehensive list of parameters that the command accepts and understands.
 	exports.options = {
     	message: {
-    		aliases: false,
+    	    nodash: true,
     		required: true,
     		description: 'The message to be displayed.'
     	},
@@ -73,7 +73,7 @@ Any options specified in the user input will be passed to the `invoke()` functio
 		}
 	}
 
-When you define options with aliases set to false, such as the message option in the above example, that lets Shotgun know that this option will have no name provided in the user input. Options without aliases will be added to the `options` object that is passed to the command's `invoke()` function in the order they are found in the parsed user input. For example:
+When you define options with `nodash` set to true, such as the message option in the above example, that lets Shotgun know that this option will have no hyphenated name provided in the user input. Options without names will be added to the `options` object that is passed to the command's `invoke()` function in the order they are found in the parsed user input. For example:
 
 	echo "Dance monkey, dance!" -i 5
 
@@ -86,7 +86,7 @@ Using the sample 'echo' command we defined earlier the above sample user input w
 		options.message == "Dance monkey, dance!"; // true
 	};
 
-Since the `message` option has no aliases Shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has no defined aliases.
+Since the `message` option has `nodash` set to true Shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has `nodash` enabled.
 
 I stated earlier that named options are passed to the command even if they are not defined in the `options` property of that command. Thus, the following is valid:
 
