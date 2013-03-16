@@ -1,7 +1,7 @@
-var Shell = require('../index'),
+var shotgun = require('../index'),
 	prompt = require('prompt');
 
-var shell = new Shell('cmds');
+var shell = new shotgun.Shell('cmds');
 
 function callback(err, v) {
 	prompt.pause();

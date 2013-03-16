@@ -1,4 +1,4 @@
-exports.description = 'Displays general help information or information about a specific command.';
+exports.description = 'Displays general help info or info about a specific command.';
 
 exports.usage = '[command]';
 

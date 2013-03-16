@@ -9,7 +9,7 @@ var fs = require('fs'),
 	optimist = require('optimist'),
 	shellQuote = require('shell-quote');
 
-module.exports = function (cmdsDir) {
+module.exports.Shell = function (cmdsDir) {
 	var self = this;
 
 	self.cmds = {};
@@ -41,9 +41,9 @@ module.exports = function (cmdsDir) {
 			cmd = self.cmds[name.toLowerCase()];
 
 		args.splice(0,1);
-		res.writeLine = function (text, displayOptions) {
+		res.writeLine = function (text, options) {
 			res.lines.push({
-				displayOptions: displayOptions,
+				options: options,
 				text: text || ''
 			});
 		};
