@@ -3,12 +3,12 @@ var shotgun = require('../index'),
 
 var shell = new shotgun.Shell('cmds');
 
-function callback(err, v) {
+function callback(err, val) {
 	prompt.pause();
 	var exit = false;
-	if (v.cmdStr) {
-		var result = shell.execute(v.cmdStr, { msg: 'Yay it worked!' });
-		if (result.clearDisplay) require('util').print("\u001b[2J\u001b[0;0H");
+	if (val.cmdStr && !err) {
+		var result = shell.execute(val.cmdStr);
+		if (result.clearDisplay) console.warn('clear is not supported')
 		exit = result.exit;
 		result.lines.forEach(function (line) {
 			console.log(line.text);

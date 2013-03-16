@@ -4,20 +4,20 @@ exports.usage = '[options]';
 
 exports.options = {
 	message: {
-		aliases: null,
+		nodash: true,
 		required: true,
 		description: 'The message to be displayed.'
 	},
 	iterations: {
-		aliases: ['i, iterations'],
+		aliases: ['i'],
 		required: true,
 		default: 1,
 		description: 'The number of times to display the message.',
-		validate: /^\d+$/
+		validate: /^[1-9]\d*$/
 	}
 };
 
 exports.invoke = function (res, options, shell) {
 	for (var count = 0; count < options.iterations; count++)
-		res.writeLine(options.message);
+		res.log(options.message);
 };

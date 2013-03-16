@@ -31,7 +31,7 @@ Shotgun aims to make it extremely easy to write simple command modules. There is
 	exports.invoke = function (res, options, shell) {
 		var iterations = options.iterations;
 		for (var count = 0; count < iterations; count++) {
-			res.writeLine(options.message);
+			res.log(options.message);
 		}
 	};
 
@@ -53,15 +53,25 @@ Command modules may also expose any of three other properties.
     		description: 'The message to be displayed.'
     	},
     	iterations: {
-    		aliases: ['i, iterations'],
+    		aliases: ['i'],
     		required: true,
     		default: 1,
     		description: 'The number of times to display the message.',
-    		validate: /^\d+$/
+    		validate: /^[1-9]\d*$/
     	}
     };
 
-Any options specified in the user input will be passed to the `invoke()` function of the command regardless of whether or not they appear in the command's `options` property. The `options` property is used to validate specific options that the command understands. For instance, in the above example we provided a regular expression to the validation property on the iterations option; Shotgun will scan the defined options for your command and use that information if it sees incoming options that match.
+Any options specified in the user input will be passed to the `invoke()` function of the command regardless of whether or not they appear in the command's `options` property. The `options` property is used to validate specific options that the command understands. For instance, in the above example we provided a regular expression to the validation property on the iterations option. You may also supply a function to the validate property if you need a more customized validation.
+
+	iterations: {
+		aliases: ['i'],
+		required: true,
+		default: 1,
+		description: 'The number of times to display the message.',
+		validate: function (value) {
+			return value > 0;
+		}
+	}
 
 When you define options with aliases set to false, such as the message option in the above example, that lets Shotgun know that this option will have no name provided in the user input. Options without aliases will be added to the `options` object that is passed to the command's `invoke()` function in the order they are found in the parsed user input. For example:
 
@@ -170,16 +180,16 @@ This would yield:
 
 The `shell.execute()` function always returns a result object. You may have noticed in our example command above that this object gets passed into the `help` and `invoke` functions. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as Shotgun will add context information to it for you; if you overwrite this object you will lose this information.
 
-The result object contains helper functions. While you could manually push an object to the lines array on the result object, it is far more convenient to use the provided helper functions. Below is an example of using the `writeLine()` function.
+The result object contains helper functions. While you could manually push an object to the lines array on the result object, it is far more convenient to use the provided helper functions. Below is an example of using the `log()` function.
 
 	exports.invoke = function (res, options, shell) {
-        res.writeLine('This is an example of using the writeLine() function.');
+        res.log('This is an example of using the log() function.');
     };
     
-Some functions, such as `writeLine()` take an options object if needed. In the case of `writeLine()` this object is added to each line object in the lines array.
+Some functions, such as `log()` take an options object if needed. In the case of `log()` this object is added to each line object in the lines array.
 
 	exports.invoke = function (res, args, options) {
-		res.writeLine('If possible, the UI should display this line bolded, italicized, and underlined.', {
+		res.log('If possible, the UI should display this line bolded, italicized, and underlined.', {
 			bold: true,
 			italic: true,
 			underline: true
@@ -207,7 +217,7 @@ There are standard properties that Shotgun always adds to the result object such
 	// cmds/mycommand.js
 
 	exports.invoke = function (res, options, shell) {
-		res.writeLine('Custom value: ' + options.someValue);
+		res.log('Custom value: ' + options.someValue);
 	};
 
 Values supplied in this manner will override user input that matches it, so be mindful of the options you pass in. For example:

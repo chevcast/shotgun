@@ -4,17 +4,17 @@ exports.usage = '[command]';
 
 exports.options = {
 	command: {
-		aliases: null,
+		aliases: false,
 		required: false,
 		description: 'Get more information about a specific command.'
 	}
 };
 
 exports.invoke = function (res, options, shell) {
-	res.writeLine();
+	res.log();
 	for (var key in shell.cmds) {
 		var cmd = shell.cmds[key];
-		if (cmd.description) res.writeLine(key + '\t\t' + cmd.description);
+		if (cmd.description) res.log(key + '\t\t' + cmd.description);
 	}
-	res.writeLine();
+	res.log();
 };
