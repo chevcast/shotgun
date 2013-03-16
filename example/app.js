@@ -11,7 +11,7 @@ function callback(err, val) {
 		if (result.clearDisplay) console.warn('clear is not supported')
 		exit = result.exit;
 		result.lines.forEach(function (line) {
-			console.log(line.text);
+			console[line.type](line.text)
 		});
 	}
 	if (!exit) {

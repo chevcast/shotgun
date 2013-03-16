@@ -74,7 +74,7 @@ module.exports.Shell = function (cmdsDir) {
 					var definedOption = cmd.options[key];
 
 					// If option has named=false, attach non-named parameters as option and remove from `options._` array.
-					if (definedOption.nodash && options._.length > 0) {
+					if (!(key in options) && definedOption.nodash && options._.length > 0) {
 						options[key] = options._[nonNamedIndex];
 						options._.splice(nonNamedIndex, 1);
 					}
