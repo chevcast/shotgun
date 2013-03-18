@@ -14,7 +14,6 @@ module.exports.Shell = function (cmdsDir) {
 	var self = this;
 
 	self.cmds = {};
-	self.context = {};
 
 	function readCommands(dir) {
 		var files = fs.readdirSync(dir);
@@ -32,17 +31,11 @@ module.exports.Shell = function (cmdsDir) {
 	readCommands(cmdsDir || 'cmds');
 
 	self.execute = function (cmdStr, options) {
-
-		if (!cmdStr) return {};
 		var res = {
-				context: self.context,
+				context: {},
 				lines: []
-			},
-			args = shellQuote.parse(cmdStr),
-			name = args[0],
-			cmd = self.cmds[name.toLowerCase()];
+			};
 
-		args.splice(0,1);
 		res.log = function (text, options) {
 			res.lines.push({
 				options: options,
@@ -64,6 +57,15 @@ module.exports.Shell = function (cmdsDir) {
 				text: text || ''
 			});
 		};
+
+		if (!cmdStr)
+			res.error('You must supply a value.');
+
+		var	args = shellQuote.parse(cmdStr),
+			cmdName = args[0],
+			cmd = self.cmds[cmdName.toLowerCase()];
+
+		args.splice(0,1);
 
 		if (cmd) {
 			options = extend(optimist(args).argv, options);
@@ -124,9 +126,13 @@ module.exports.Shell = function (cmdsDir) {
 			}
 
 			res.prompt = function (promptVar, callback) {
-				// Check (promptVar in options).
-				// If promptVar exists then invoke callback(options[promptVar]);
-				// else set forced context.
+				if (promptVar in options)
+					callback(options[promptVar]);
+				else {
+					res.context.cmdName = cmdName;
+					res.context.options = options;
+					res.context.promptVar = promptVar;
+				}
 			};
 //			res.passive = function (promptVar, callback) {
 //				// Check (promptVar in options).
@@ -137,7 +143,7 @@ module.exports.Shell = function (cmdsDir) {
 			if (okToInvoke) cmd.invoke(res, options, self);
 		}
 		else
-			res.error('"' + name + '" is not a valid command.');
+			res.error('"' + cmdName + '" is not a valid command.');
 
 		return res;
 
