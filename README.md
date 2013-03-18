@@ -1,5 +1,4 @@
-Shotgun
-===============================
+# Shotgun
 
 Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, Shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.
 

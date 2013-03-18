@@ -122,6 +122,18 @@ module.exports.Shell = function (cmdsDir) {
 					}
 				}
 			}
+
+			res.prompt = function (promptVar, callback) {
+				// Check (promptVar in options).
+				// If promptVar exists then invoke callback(options[promptVar]);
+				// else set forced context.
+			};
+//			res.passive = function (promptVar, callback) {
+//				// Check (promptVar in options).
+//				// If promptVar exists then invoke callback(options[promptVar]);
+//				// else set passive context.
+//			};
+
 			if (okToInvoke) cmd.invoke(res, options, self);
 		}
 		else
