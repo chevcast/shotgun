@@ -30,9 +30,9 @@ module.exports.Shell = function (cmdsDir) {
 	readCommands(path.resolve(__dirname, 'cmds'));
 	readCommands(cmdsDir || 'cmds');
 
-	self.execute = function (cmdStr, options) {
+	self.execute = function (cmdStr, options, context) {
 		var res = {
-				context: {},
+				context: context || {},
 				lines: []
 			};
 
@@ -53,7 +53,7 @@ module.exports.Shell = function (cmdsDir) {
 		res.warn = function (text, options) {
 			res.lines.push({
 				options: options,
-				type: 'warning',
+				type: 'warn',
 				text: text || ''
 			});
 		};
@@ -62,13 +62,21 @@ module.exports.Shell = function (cmdsDir) {
 			res.error('You must supply a value.');
 
 		var	args = shellQuote.parse(cmdStr),
-			cmdName = args[0],
-			cmd = self.cmds[cmdName.toLowerCase()];
+			cmdName = args[0];
 
-		args.splice(0,1);
+		if (context && context.promptVar) {
+			cmdName = context.cmdName;
+			options = context.options;
+			options[context.promptVar] = cmdStr;
+		}
+		else {
+			args.splice(0,1);
+			options = extend(optimist(args).argv, options);
+		}
+
+		var cmd = self.cmds[cmdName.toLowerCase()];
 
 		if (cmd) {
-			options = extend(optimist(args).argv, options);
 			var okToInvoke = true;
 			if (cmd.options) {
 				var nonNamedIndex = 0;
@@ -96,7 +104,7 @@ module.exports.Shell = function (cmdsDir) {
 						options[key] = definedOption.default;
 
 					// If defined option has a validate expression or function then test our option value against it.
-					if (definedOption.validate) {
+					if (definedOption.validate && (definedOption.required || (key in options))) {
 						if (definedOption.validate instanceof RegExp) {
 							if (!definedOption.validate.test(options[key])) {
 								okToInvoke = false;
@@ -125,13 +133,20 @@ module.exports.Shell = function (cmdsDir) {
 				}
 			}
 
-			res.prompt = function (promptVar, callback) {
-				if (promptVar in options)
+			res.prompt = function () {
+				var promptVar = arguments[0],
+					promptMsg = arguments.length > 2 ? arguments[1] : 'Please enter ' + promptVar + '.',
+					callback = arguments.length == 2 ? arguments[1] : arguments[2];
+
+				if (promptVar in options) {
+					res.context = {};
 					callback(options[promptVar]);
+				}
 				else {
 					res.context.cmdName = cmdName;
 					res.context.options = options;
 					res.context.promptVar = promptVar;
+					res.log(promptMsg);
 				}
 			};
 //			res.passive = function (promptVar, callback) {
