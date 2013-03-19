@@ -232,3 +232,5 @@ will yield:
 	exports.invoke = function (res, options, shell) {
 		options.someValue; // 'bacon'
 	};
+
+## todo: Add documentation for prompt helper function.
