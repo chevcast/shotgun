@@ -40,7 +40,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
 
 	So far we haven't done anything with shotgun. We've just put together a small app the continually asks the user for input and then prints that input to the console.
 
-	> prompt: cmdStr: test
+	> prompt: cmdStr: test  
 	> Echo: test
 
 3. Once you have a proper prompt application setup go ahead and install shotgun.
@@ -381,14 +381,14 @@ The simplest usage of `res.prompt()` simply gets a value from the user. That val
 
 When prompt is provided a variable name, in this case "username", it will first check the supplied options object to see if that variable was provided. If it was then it immediately invokes the callback and passes in the value without prompting the user for anything. If the value is not found on the options object then it will prompt the user for the value. This allows the user to do things like this:
 
-> $ login
-> Please enter a username.
-> $ charlie
+> $ login  
+> Please enter a username.  
+> $ charlie  
 > Welcome charlie!
 
 or the user could specify username up front and skip the prompt altogether!
 
-> $ login --username charlie
+> $ login --username charlie  
 > Welcome charlie!
 
 Keep in mind that if the option you are prompting for is defined as a **required** option on your command then shotgun will complain if the value is not supplied before it even calls your `invoke()` function. Similarly, if your option has a default value defined then the user will never be prompted because the prompt helper will see the default value and use that if it is not supplied.
@@ -410,23 +410,23 @@ Prompts are also capable of being nested if needed.
 
 This short little snippet would allow the user to supply the values several ways.
 
-> $ login
-> Please enter a username.
-> $ charlie
-> Please enter your password.
-> $ password123
+> $ login  
+> Please enter a username.  
+> $ charlie  
+> Please enter your password.  
+> $ password123  
 > Success!
 
 or
 
-> $ login --username charlie
-> Please enter your password.
-> $ password123
+> $ login --username charlie  
+> Please enter your password.  
+> $ password123  
 > Success!
 
 or
 
-> $ login --username charlie --password password123
+> $ login --username charlie --password password123  
 > Success!
 
 It gets even better though. If you define options on your command with `nodash` set to true then you can omit the '--username' and '--password' identifiers.
@@ -442,23 +442,23 @@ It gets even better though. If you define options on your command with `nodash` 
 
 Now that you've defined those options on your command the user no longer has to include the hyphenated option identifiers.
 
-> $ login charlie password123
+> $ login charlie password123  
 > Success!
 
 Because shotgun is UI agnostic we don't have convenient console functionality like CTRL + C to end a current action. To mitigate that shotgun looks for the special user input "cancel" and will cancel the active prompt.
 
-> $ login
-> Please enter a username.
-> $ cancel
+> $ login  
+> Please enter a username.  
+> $ cancel  
 > prompt canceled
 
 ## Setting a helpful command context.
 
 Command contexts are extremely helpful and save the user a lot of keystrokes. Basically a command context is a state that tells shotgun to pass all supplied values to the command in the context. It will be easier to illustrate this concept with an example. Let's say you are authoring a 'topic' command module. This command is responsible for showing a topic on a forum board. To execute this command the user would supply a topic ID to the command like 'topic 123' and the command would display the content of the forum topic with ID 123. Now let's say the user wants to reply to topic 123 and in order to do that you've setup a '-r' option that will prompt them for their reply text. The user's experience would go something like this:
 
-> $ topic 123
-> [displays topic content]
-> $ topic 123 -r
+> $ topic 123  
+> [displays topic content]  
+> $ topic 123 -r  
 > Please enter your reply.
 
 The user is forced to type the entire 'topic 123' command over again just so he/she can supply the '-r' flag. With command contexts your topic command can simply do this:
@@ -467,18 +467,18 @@ The user is forced to type the entire 'topic 123' command over again just so he/
 
 This simple helper will setup a command context. Now all the user's input will be appended to that context. The new user experience will be something like this:
 
-> $ topic 123
-> [displays topic content]
-> $ -r
+> $ topic 123  
+> [displays topic content]  
+> $ -r  
 > Please enter your reply.
 
 The full command is expanded out to 'topic 123 -r' because shotgun knows that 'topic 123' is the current context. How does the user clear the context you ask? They don't have to! If the supplied input from the user matches another command then shotgun will disregard the context and execute that command. If that command creates a different context then it will override the previous context. If that command does not create a new context then the context will be restored after the command is finished. Basically this means a user experience like the following is possible:
 
-> $ topic 123
-> [displays topic content]
-> $ help topic
-> [displays help for the topic command]
-> $ -r
+> $ topic 123  
+> [displays topic content]  
+> $ help topic  
+> [displays help for the topic command]  
+> $ -r  
 > Please enter your reply.
 
 Notice how the user was able to run the 'help' command after the 'topic 123' context was set. When the 'help' command finished the user was still able to supply just the '-r' because the context was still active. The default 'clear' command resets the active context but if you do need to clear the active context anywhere else in your command modules then you can run the following helper:
