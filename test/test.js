@@ -25,7 +25,7 @@ describe('Shotgun Shell', function () {
 			}
 		});
 		it('should override user supplied options if options are passed in manually.', function () {
-			var result = shell.execute('echo test -i 5', { message: 'test override', iterations: 10 });
+			var result = shell.execute('echo test -i 5', {}, { message: 'test override', iterations: 10 });
 			should.exist(result);
 			result.should.have.property('lines').with.length(10);
 			result.lines[0].should.have.property('text', 'test override');
@@ -70,9 +70,9 @@ describe('Shotgun Shell', function () {
 		it('should continue prompt if context is passed back in.', function () {
 			var result = shell.execute('login');
 			should.exist(result);
-			result = shell.execute('charlie', {}, result.context);
+			result = shell.execute('charlie', result.context);
 			should.exist(result);
-			result = shell.execute('password123', {}, result.context);
+			result = shell.execute('password123', result.context);
 			should.exist(result);
 			result.should.have.property('lines').with.length(1);
 			result.lines[0].should.have.property('type', 'log');
@@ -89,14 +89,14 @@ describe('Shotgun Shell', function () {
 		it('should not send values to context command if input matches real command.', function () {
 			var result = shell.execute('topic 123');
 			should.exist(result);
-			result = shell.execute('help', {}, result.context);
+			result = shell.execute('help', result.context);
 			should.exist(result);
 			result.should.have.property('lines').with.length(8);
 		});
 		it('should send values to context command if input does not match real command.', function () {
 			var result = shell.execute('topic 123');
 			should.exist(result);
-			result = shell.execute('-r', {}, result.context);
+			result = shell.execute('-r', result.context);
 			should.exist(result);
 			result.should.have.property('lines').with.length(1);
 			result.lines[0].should.have.property('type', 'log');
@@ -106,7 +106,7 @@ describe('Shotgun Shell', function () {
 			var result = shell.execute('topic 123');
 			should.exist(result);
 			result.should.have.property('context').with.property('cmdStr', 'topic 123');
-			result = shell.execute('clear', {}, result.context);
+			result = shell.execute('clear', result.context);
 			should.exist(result);
 			result.should.have.property('context').not.with.property('cmdStr');
 		});

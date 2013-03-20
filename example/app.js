@@ -7,7 +7,7 @@ function callback(err, val) {
 	var result = {},
 		exit = false;
 	if (!err && val.cmdStr) {
-		result = shell.execute(val.cmdStr, {}, context);
+		result = shell.execute(val.cmdStr, context);
 
 		context = result.context;
 

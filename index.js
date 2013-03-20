@@ -47,7 +47,7 @@ module.exports.Shell = function (cmdsDir) {
 	// cmdStr - the user-provided command string, with arguments.
 	// options - properties on the options object will override user-provided arguments.
 	// context - this object is used to maintain state across multiple executions. Pass in res.context.
-	self.execute = function (cmdStr, options, context) {
+	self.execute = function (cmdStr, context, options) {
 
 		// Define our response object. This is the object we will return.
 		var res = {
@@ -242,7 +242,7 @@ module.exports.Shell = function (cmdsDir) {
 		else {
 			// If a passive context exists then rerun 'execute' passing in the command string stored in the context...
 			if (context && context.cmdStr) {
-				res = self.execute(context.cmdStr + ' ' + cmdStr, {}, context);
+				res = self.execute(context.cmdStr + ' ' + cmdStr, context);
 			}
 			// If no context exists and the user did not provide the value 'cancel' then write invalid command error.
 			else if (cmdName.toLowerCase() !== 'cancel')
