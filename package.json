@@ -14,7 +14,7 @@
     "prompt": "*"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha -R tap"
   },
   "repository": {
     "type": "git",

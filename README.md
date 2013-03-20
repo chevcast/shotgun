@@ -150,7 +150,7 @@ That's it, you're done with your first little shotgun app!
 
 # Creating a Shotgun Command Module
 
-Shotgun aims to make it extremely easy to write simple command modules. There is only one function that a command module must expose.
+Shotgun command modules are just Node modules. There isn't anything special about them except that they must define a specific function called 'invoke'.
 
 	// cmds/echo.js
 
