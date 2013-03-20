@@ -1,15 +1,15 @@
-# node-shotgun
+## node-shotgun
 
 Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.
 
 ---
 
-## Module Installation
+### Module Installation
 
     npm install shotgun
 
 
-## Module Usage
+### Module Usage
 
 To use shotgun you simply require it and create an instance of the shell.
 
@@ -20,7 +20,7 @@ The shell optionally accepts a path (relative to the current working directory) 
 
 ---
 
-# Getting started using the shell.
+## Getting started using the shell.
 
 Once you've setup shotgun and instantiated the shell you can build any UI application around it that you wish. The simplest application is just a basic console app so that's what we'll setup here.
 
@@ -148,7 +148,7 @@ That's it, you're done with your first little shotgun app!
 
 ---
 
-# Creating a Shotgun Command Module
+## Creating a Shotgun Command Module
 
 Shotgun command modules are just Node modules. There isn't anything special about them except that they must define a specific function called 'invoke'.
 
@@ -303,7 +303,7 @@ This would yield:
         ]
     }
 
-## The `invoke` function and the result object.
+### The `invoke` function and the result object.
 
 The `shell.execute()` function always returns a result object. You may have noticed in our example command above that this object gets passed into the `help` and `invoke` functions. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as shotgun will add context information to it for you; if you overwrite this object you will lose this information.
 
@@ -361,7 +361,7 @@ will yield:
         options.someValue; // 'bacon'
     };
 
-## Prompting the user for a value.
+### Prompting the user for a value.
 
 Shotgun wants to make it extremely easy for you to write command modules. To that end shotgun provides you with an easy API that can be used to prompt the user for a value.
 
@@ -452,7 +452,7 @@ Because shotgun is UI agnostic we don't have convenient console functionality li
 > $ cancel  
 > prompt canceled
 
-## Setting a helpful command context.
+### Setting a helpful command context.
 
 Command contexts are extremely helpful and save the user a lot of keystrokes. Basically a command context is a state that tells shotgun to pass all supplied values to the command in the context. It will be easier to illustrate this concept with an example. Let's say you are authoring a 'topic' command module. This command is responsible for showing a topic on a forum board. To execute this command the user would supply a topic ID to the command like 'topic 123' and the command would display the content of the forum topic with ID 123. Now let's say the user wants to reply to topic 123 and in order to do that you've setup a '-r' option that will prompt them for their reply text. The user's experience would go something like this:
 
