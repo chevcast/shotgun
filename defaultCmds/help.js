@@ -16,7 +16,7 @@ exports.invoke = function (res, options, shell) {
             var cmd = shell.cmds[key],
                 helpStr = key;
             if (cmd.description) {
-                for (var count = 0; count < (35 - key.length); count++) {
+                for (var count = 0; count < (20 - key.length); count++) {
                     helpStr += ' ';
                 }
                 helpStr += cmd.description;
@@ -47,7 +47,7 @@ exports.invoke = function (res, options, shell) {
                     }
                     if (option.description) {
                         var length = optionStr.length;
-                        for (var count = 0; count < (35 - length); count++) {
+                        for (var count = 0; count < (20 - length); count++) {
                             optionStr += ' ';
                         }
                         optionStr += option.description;
