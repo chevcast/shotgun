@@ -15,20 +15,23 @@ module.exports.Shell = function (cmdsDir) {
 
     // Reads all command modules from the specified directory and adds them to self.cmds.
     function readCommands(dir) {
-        var files = fs.readdirSync(dir);
-        if (files)
-            files.forEach(function (file) {
-                var cmd = require(path.resolve(dir, file));
-                if (cmd && cmd.invoke) {
-                    var cmdName = path.basename(file, '.js').toLowerCase();
-                    if (!(cmdName in self.cmds))
-                        self.cmds[cmdName] = cmd;
+        if (fs.existsSync(dir)) {
+            var files = fs.readdirSync(dir);
+            if (files) {
+                files.forEach(function (file) {
+                    var cmd = require(path.resolve(dir, file));
+                    if (cmd && cmd.invoke) {
+                        var cmdName = path.basename(file, '.js').toLowerCase();
+                        if (!(cmdName in self.cmds))
+                            self.cmds[cmdName] = cmd;
+                        else
+                            console.warn('"%s" was not loaded because a command with the same name was already loaded.', dir + '/' + file);
+                    }
                     else
-                        console.warn('"%s" was not loaded because a command with the same name was already loaded.', dir + '/' + file);
-                }
-                else
-                    console.warn('"%s" is not compatible with shotgun-shell and was not loaded.', file);
-            });
+                        console.warn('"%s" is not compatible with shotgun-shell and was not loaded.', file);
+                });
+            }
+        }
     }
 
     // Read in user provided commands first.
