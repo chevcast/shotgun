@@ -1,30 +1,36 @@
 {
-    "name": "shotgun",
-    "version": "1.0.1",
-    "description": "Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, Shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.",
-    "main": "./index",
-    "dependencies": {
-        "optimist": "~0.3.5",
-        "shell-quote": "0.0.1",
-        "node.extend": "~1.0.0"
-    },
-    "devDependencies": {
-        "mocha": "*",
-        "chai": "*",
-        "prompt": "*"
-    },
-    "scripts": {
-        "test": "mocha -R tap"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Chevex/node-shotgun.git"
-    },
-    "keywords": [
-        "command", "line", "cli", "shell", "shotgun", "terminal", "prompt"
-    ],
-    "author": "Alex Ford",
-    "license": "Apache",
-    "readmeFilename": "README.md",
-    "gitHead": "812d49a1ae47cf60c945e14b0bc06542dc940d65"
+  "name": "shotgun",
+  "version": "1.0.2",
+  "description": "Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, Shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.",
+  "main": "./index",
+  "dependencies": {
+    "optimist": "~0.3.5",
+    "shell-quote": "0.0.1",
+    "node.extend": "~1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "prompt": "*"
+  },
+  "scripts": {
+    "test": "mocha -R tap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Chevex/node-shotgun.git"
+  },
+  "keywords": [
+    "command",
+    "line",
+    "cli",
+    "shell",
+    "shotgun",
+    "terminal",
+    "prompt"
+  ],
+  "author": "Alex Ford",
+  "license": "Apache",
+  "readmeFilename": "README.md",
+  "gitHead": "812d49a1ae47cf60c945e14b0bc06542dc940d65"
 }
