@@ -54,7 +54,7 @@ module.exports.Shell = function (cmdsDir) {
             res.lines.push({
                 options: options,
                 type: 'log',
-                text: text || ''
+                text: text || '\n'
             });
         };
         // Helper function to add simple error text to the res.lines array.
@@ -62,7 +62,7 @@ module.exports.Shell = function (cmdsDir) {
             res.lines.push({
                 options: options,
                 type: 'error',
-                text: text || ''
+                text: text || '\n'
             });
         };
         // Helper function to add simple warning text to the res.lines array.
@@ -70,7 +70,7 @@ module.exports.Shell = function (cmdsDir) {
             res.lines.push({
                 options: options,
                 type: 'warn',
-                text: text || ''
+                text: text || '\n'
             });
         };
 
