@@ -13,9 +13,15 @@ exports.invoke = function (res, options, shell) {
     res.log();
     if (!options.command) {
         for (var key in shell.cmds) {
-            var cmd = shell.cmds[key];
-            if (cmd.description)
-                res.log(key + '\t\t' + cmd.description);
+            var cmd = shell.cmds[key],
+                helpStr = key;
+            if (cmd.description) {
+                for (var count = 0; count < (35 - key.length); count++) {
+                    helpStr += ' ';
+                }
+                helpStr += cmd.description;
+            }
+            res.log(helpStr);
         }
     }
     else {
