@@ -10,7 +10,6 @@ exports.options = {
 };
 
 exports.invoke = function (res, options, shell) {
-    res.log();
     if (!options.command) {
         for (var key in shell.cmds) {
             var cmd = shell.cmds[key],
