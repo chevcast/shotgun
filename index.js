@@ -80,7 +80,7 @@ module.exports.Shell = function (cmdsDir) {
         // Write a blank line before executing commands.
         res.log();
         if (!context || !context.prompt) {
-            res.log('$ ' + cmdStr);
+            res.log('> ' + cmdStr);
             res.log();
         }
 
