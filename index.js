@@ -48,6 +48,7 @@ module.exports.Shell = function (cmdsDir) {
 
         // Define our response object. This is the object we will return.
         var res = {
+            context: {},
             lines: []
         };
 
@@ -76,6 +77,9 @@ module.exports.Shell = function (cmdsDir) {
             });
         };
 
+        // Write a blank line before executing commands.
+        res.log();
+
         // If no command string was supplied then write an error message.
         if (!cmdStr)
             res.error('You must supply a value.');
@@ -84,16 +88,16 @@ module.exports.Shell = function (cmdsDir) {
         var args = shellQuote.parse(cmdStr), cmdName = args[0];
 
         // If a prompt context exists then override command and options with those stored in the context...
-        if (context && context.promptVar) {
+        if (context && context.prompt) {
             if (cmdStr.toLowerCase() !== 'cancel') {
-                cmdName = context.cmdName;
-                options = context.options;
-                options[context.promptVar] = cmdStr;
+                cmdName = context.prompt.cmdName;
+                options = context.prompt.options;
+                options[context.prompt.var] = cmdStr;
             }
             else {
                 res.warn('prompt canceled');
-                if (context.previousContext)
-                    res.context = extend({}, context.previousContext);
+                if (context.prompt.previousContext)
+                    res.context = context.prompt.previousContext;
             }
         }
         // ...otherwise remove the command name from the args array and build our options object.
@@ -204,18 +208,20 @@ module.exports.Shell = function (cmdsDir) {
                 // If the requested variable exists on the options object then immediately invoke the callback and
                 // pass in the value.
                 if ((promptVar in options) && (typeof(options[promptVar]) !== 'boolean')) {
-                    res.context = extend({}, context.previousContext);
+                    if (context && context.prompt && context.prompt.previousContext)
+                        res.context = context.prompt.previousContext;
                     callback(options[promptVar]);
                 }
                 // If the variable does not exist on the options object then setup a prompt context so that the next
                 // user-provided value is added to the options object under that variable name.
                 else {
-                    res.context = {
+                    res.context.prompt = {
                         cmdName: cmdName,
                         options: options,
-                        promptVar: promptVar,
-                        previousContext: context
+                        var: promptVar
                     };
+                    if (!context || !context.prompt)
+                        res.context.prompt.previousContext = context;
                     res.log(promptMsg);
                 }
             };
@@ -223,7 +229,7 @@ module.exports.Shell = function (cmdsDir) {
             // then it will ignore the passive context and execute the matching command. If it does not match a command
             // then it will append the provided string to the contexted string and re-execute.
             res.setContext = function (cmdStr, contextMsg) {
-                res.context = {
+                res.context.passive = {
                     cmdStr: cmdStr,
                     msg: contextMsg || cmdStr
                 };
@@ -239,8 +245,8 @@ module.exports.Shell = function (cmdsDir) {
         // ...if the command does not exist then check to see if a passive context exists.
         else {
             // If a passive context exists then rerun 'execute' passing in the command string stored in the context...
-            if (context && context.cmdStr) {
-                res = self.execute(context.cmdStr + ' ' + cmdStr, context);
+            if (context && context.passive && context.passive.cmdStr) {
+                res = self.execute(context.passive.cmdStr + ' ' + cmdStr, context);
             }
             // If no context exists and the user did not provide the value 'cancel' then write invalid command error.
             else if (cmdName.toLowerCase() !== 'cancel')
