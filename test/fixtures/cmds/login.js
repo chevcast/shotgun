@@ -15,7 +15,9 @@ exports.options = {
 
 exports.invoke = function (res, options, shell) {
     res.prompt('Please enter your username.', 'username', function (username) {
+        res.password = true;
         res.prompt('Please enter your password.', 'password', function (password) {
+            res.password = false;
             if (username.toLowerCase() === 'charlie' && password === 'password123')
                 res.log('Success!');
             else
