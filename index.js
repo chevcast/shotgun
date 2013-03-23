@@ -158,7 +158,7 @@ module.exports.Shell = function (cmdsDir) {
                             // If value does not pass validation then do not invoke command and write error message.
                             if (!definedOption.validate.test(options[key])) {
                                 okToInvoke = false;
-                                res.error('Invalid value for "' + key + '"');
+                                res.error('invalid value for "' + key + '"');
                             }
                         }
                         // If defined validation is a function then pass the value to it.
@@ -168,14 +168,14 @@ module.exports.Shell = function (cmdsDir) {
                                 // error message.
                                 if (!definedOption.validate(options[key])) {
                                     okToInvoke = false;
-                                    res.error('Invalid value for "' + key + '"');
+                                    res.error('invalid value for "' + key + '"');
                                 }
                             }
                                 // If the provided validation function throws an error at any point then handle it
                                 // gracefully and simply fail validation.
                             catch (ex) {
                                 okToInvoke = false;
-                                res.error('Invalid value for "' + key + '"');
+                                res.error('invalid value for "' + key + '"');
                             }
                         }
                     }
@@ -183,7 +183,7 @@ module.exports.Shell = function (cmdsDir) {
                     // If option is required but is not found in supplied options then error.
                     if (definedOption.required && !(key in options)) {
                         okToInvoke = false;
-                        res.error('Missing parameter "' + key + '"');
+                        res.error('missing parameter "' + key + '"');
                     }
                 }
             }
