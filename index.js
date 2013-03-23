@@ -48,7 +48,7 @@ module.exports.Shell = function (cmdsDir) {
 
         // Define our response object. This is the object we will return.
         var res = {
-            context: {},
+            context: context,
             lines: []
         };
 
@@ -79,6 +79,10 @@ module.exports.Shell = function (cmdsDir) {
 
         // Write a blank line before executing commands.
         res.log();
+        if (!context || !context.prompt) {
+            res.log('> ' + cmdStr);
+            res.log();
+        }
 
         // If no command string was supplied then write an error message.
         if (!cmdStr)
@@ -96,8 +100,7 @@ module.exports.Shell = function (cmdsDir) {
             }
             else {
                 res.warn('prompt canceled');
-                if (context.prompt.previousContext)
-                    res.context = context.prompt.previousContext;
+                res.context = context.prompt.previousContext;
             }
         }
         // ...otherwise remove the command name from the args array and build our options object.
@@ -208,20 +211,23 @@ module.exports.Shell = function (cmdsDir) {
                 // If the requested variable exists on the options object then immediately invoke the callback and
                 // pass in the value.
                 if ((promptVar in options) && (typeof(options[promptVar]) !== 'boolean')) {
-                    if (context && context.prompt && context.prompt.previousContext)
-                        res.context = context.prompt.previousContext;
+                    res.context = context && context.prompt ? context.prompt.previousContext : {};
                     callback(options[promptVar]);
                 }
                 // If the variable does not exist on the options object then setup a prompt context so that the next
                 // user-provided value is added to the options object under that variable name.
                 else {
-                    res.context.prompt = {
-                        cmdName: cmdName,
-                        options: options,
-                        var: promptVar
+                    res.context = {
+                        prompt: {
+                            cmdName: cmdName,
+                            options: options,
+                            var: promptVar
+                        }
                     };
                     if (!context || !context.prompt)
-                        res.context.prompt.previousContext = context;
+                        res.context.prompt.previousContext = extend({}, context);
+                    else if (context && context.prompt)
+                        res.context.prompt.previousContext = context.prompt.previousContext;
                     res.log(promptMsg);
                 }
             };
@@ -229,9 +235,11 @@ module.exports.Shell = function (cmdsDir) {
             // then it will ignore the passive context and execute the matching command. If it does not match a command
             // then it will append the provided string to the contexted string and re-execute.
             res.setContext = function (cmdStr, contextMsg) {
-                res.context.passive = {
-                    cmdStr: cmdStr,
-                    msg: contextMsg || cmdStr
+                res.context = {
+                    passive: {
+                        cmdStr: cmdStr,
+                        msg: contextMsg || cmdStr
+                    }
                 };
             };
             // Helper function to reset contexts.
