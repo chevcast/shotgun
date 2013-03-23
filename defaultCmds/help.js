@@ -57,5 +57,4 @@ exports.invoke = function (res, options, shell) {
             }
         }
     }
-    res.log();
 };
