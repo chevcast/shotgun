@@ -211,7 +211,7 @@ module.exports.Shell = function (cmdsDir) {
                 // If the requested variable exists on the options object then immediately invoke the callback and
                 // pass in the value.
                 if ((promptVar in options) && (typeof(options[promptVar]) !== 'boolean')) {
-                    res.context = context && context.prompt ? context.prompt.previousContext : {};
+                    res.context = context && context.prompt ? context.prompt.previousContext : context;
                     callback(options[promptVar]);
                 }
                 // If the variable does not exist on the options object then setup a prompt context so that the next
