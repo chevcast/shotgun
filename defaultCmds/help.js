@@ -18,7 +18,7 @@ exports.invoke = function (res, options, shell) {
             var cmd = shell.cmds[key],
                 helpStr = key;
             if (cmd.description) {
-                helpStr += new Array((maxLength - key.length) + 10).join(' ');
+                helpStr += new Array((maxLength - key.length) + 7).join(' ');
                 helpStr += cmd.description;
             }
             res.log(helpStr);
@@ -55,7 +55,7 @@ exports.invoke = function (res, options, shell) {
                     var option = strs[index].option,
                         optionStr = strs[index].str;
                     if (option.description) {
-                        optionStr += new Array((maxLength - optionStr.length) + 10).join(' ');
+                        optionStr += new Array((maxLength - optionStr.length) + 5).join(' ');
                         optionStr += option.description;
                     }
                     res.log(optionStr);
