@@ -89,7 +89,12 @@ module.exports.Shell = function (cmdsDir) {
             res.error('You must supply a value.');
 
         // Parse the command string into an argument array and set the command name to the first item.
-        var args = shellQuote.parse(cmdStr), cmdName = args[0];
+        var args = cmdStr,
+            cmdName = cmdStr;
+        if (cmdStr.length > 0) {
+            args = shellQuote.parse(cmdStr);
+            cmdName = args[0];
+        }
 
         // If a prompt context exists then override command and options with those stored in the context...
         if (context && context.prompt) {
