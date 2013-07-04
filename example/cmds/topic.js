@@ -15,6 +15,7 @@ exports.options = {
 };
 
 exports.invoke = function (res, options, shell) {
+    var res = this;
     if (!options.reply) {
         res.log('[topic ' + options.id + ' content]');
         res.setContext('topic ' + options.id);

@@ -9,7 +9,9 @@ exports.options = {
     }
 };
 
-exports.invoke = function (res, options, shell) {
+exports.invoke = function (options, shell) {
+    var res = this;
+    res.log();
     if (!options.command) {
         var maxLength = 0;
         for (var key in shell.cmds)
@@ -63,4 +65,5 @@ exports.invoke = function (res, options, shell) {
             }
         }
     }
+    res.log();
 };

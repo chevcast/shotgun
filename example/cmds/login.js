@@ -13,12 +13,16 @@ exports.options = {
     }
 };
 
-exports.invoke = function (res, options, shell) {
-    res.prompt('Please enter your username.', 'username', function (username) {
+exports.invoke = function (options, shell) {
+    var res = this;
+    res.log('Please enter your credentials.');
+    res.prompt('Username:', 'username', function (username) {
+        var res = this;
         res.password = true;
-        res.prompt('Please enter your password.', 'password', function (password) {
+        res.prompt('Password:', 'password', function (password) {
+            var res = this;
             res.password = false;
-            if (username.toLowerCase() === 'charlie' && password === 'password123')
+            if (options.username.toLowerCase() === 'charlie' && password === 'password123')
                 res.log('Success!');
             else
                 res.error('Username or password incorrect.');
