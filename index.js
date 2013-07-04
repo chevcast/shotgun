@@ -2,7 +2,8 @@ var fs = require('fs'),
     path = require('path'),
     optimist = require('optimist'),
     shellQuote = require('shell-quote'),
-    extend = require('node.extend');
+    extend = require('node.extend'),
+    CommandResponse = require('./CommandResponse');
 
 // Define the shell object.
 module.exports.Shell = function (cmdsDir) {
@@ -22,8 +23,10 @@ module.exports.Shell = function (cmdsDir) {
                     var cmd = require(path.resolve(dir, file));
                     if (cmd && cmd.invoke) {
                         var cmdName = path.basename(file, '.js').toLowerCase();
-                        if (!(cmdName in shell.cmds))
+                        if (!(cmdName in shell.cmds)){
+                            cmd.name = cmdName.toLowerCase();
                             shell.cmds[cmdName] = cmd;
+                        }
                         else
                             console.warn('"%s" was not loaded because a command with the same name was already loaded.', dir + '/' + file);
                     }
@@ -47,35 +50,7 @@ module.exports.Shell = function (cmdsDir) {
     shell.execute = function (cmdStr, context, options) {
 
         // Define our response object. This is the object we will return.
-        var res = this;
-
-        res.context = context;
-        res.lines = [];
-
-        // Helper function to add simple lines of text to the res.lines array.
-        res.log = function (text, options) {
-            res.lines.push({
-                options: options,
-                type: 'log',
-                text: text || ''
-            });
-        };
-        // Helper function to add simple error text to the res.lines array.
-        res.error = function (text, options) {
-            res.lines.push({
-                options: options,
-                type: 'error',
-                text: text || ''
-            });
-        };
-        // Helper function to add simple warning text to the res.lines array.
-        res.warn = function (text, options) {
-            res.lines.push({
-                options: options,
-                type: 'warn',
-                text: text || ''
-            });
-        };
+        var res = new CommandResponse(context);
 
         // If there is no context then print the user's supplied value to the display.
         if (!context) {
@@ -94,107 +69,32 @@ module.exports.Shell = function (cmdsDir) {
             cmdName = args[0];
         }
 
-        // Remove command from args array and build our options object.
-        args.splice(0, 1);
-        options = extend(optimist(args).argv, options);
+        // If a prompt context exists then override command and options with those stored in the context...
+        if (context && context.prompt) {
+            if (cmdStr.toLowerCase() !== 'cancel') {
+                cmdName = context.prompt.cmd;
+                options = context.prompt.options;
+                options[context.prompt.option] = cmdStr;
+                delete res.context.prompt;
+            }
+            else {
+                res.warn('prompt canceled');
+                res.context = context.prompt.previousContext;
+            }
+        }
+        // ...otherwise remove the command name from the args array and build our options object.
+        else {
+            args.splice(0, 1);
+            options = extend(optimist(args).argv, options);
+        }
 
         // Get reference to the command module by name.
         var cmd = shell.cmds[cmdName.toLowerCase()];
 
         // If the command module exists then process it's options and invoke the module...
         if (cmd) {
-            // By default it is OK to invoke the command. This can be set false at any point if options do not pass
-            // validation.
-            var okToInvoke = true;
-
-            // If the command has pre-defined options then parse through them and validate against the supplied options.
-            if (cmd.options) {
-
-                var nonNamedIndex = 0;
-
-                // Loop through the command's pre-defined options.
-                for (var key in cmd.options) {
-
-                    // The option defined by the command.
-                    var definedOption = cmd.options[key];
-
-                    // If option has named=false, attach non-named parameters as option and remove from `options._` array.
-                    if (!(key in options) && definedOption.nodash && options._.length > 0) {
-                        options[key] = options._[nonNamedIndex];
-                        options._.splice(nonNamedIndex, 1);
-                    }
-
-                    // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
-                    if (!definedOption.nodash && !(key in options) && definedOption.aliases) {
-                        definedOption.aliases.forEach(function (alias) {
-                            if (alias in options) {
-                                options[key] = options[alias];
-                                delete options[alias];
-                            }
-                        });
-                    }
-
-                    // If option has default value and was not found in supplied options then assign it.
-                    if (definedOption.default && !(key in options))
-                        options[key] = definedOption.default;
-
-                    // If defined option has a validate expression or function and the option was supplied then
-                    // validate the supplied option against the expression or function.
-                    if (definedOption.validate && (key in options)) {
-
-                        // If defined validation is a regular expression then validate the supplied value against it.
-                        if (definedOption.validate instanceof RegExp) {
-                            // If value does not pass validation then do not invoke command and write error message.
-                            if (!definedOption.validate.test(options[key])) {
-                                okToInvoke = false;
-                                res.error('invalid value for "' + key + '"');
-                            }
-                        }
-                        // If defined validation is a function then pass the value to it.
-                        else if (typeof(definedOption.validate) == 'function') {
-                            try {
-                                // If the validation function returns false then do not invoke the command and write
-                                // error message.
-                                if (!definedOption.validate(options[key])) {
-                                    okToInvoke = false;
-                                    res.error('invalid value for "' + key + '"');
-                                }
-                            }
-                                // If the provided validation function throws an error at any point then handle it
-                                // gracefully and simply fail validation.
-                            catch (ex) {
-                                okToInvoke = false;
-                                res.error('invalid value for "' + key + '"');
-                            }
-                        }
-                    }
-
-                    // If option is required but is not found in supplied options then error.
-                    if (definedOption.required && !(key in options)) {
-                        okToInvoke = false;
-                        res.error('missing parameter "' + key + '"');
-                    }
-                }
-            }
-
-            // Helper function for setting up passive contexts. If the user-provided command string matches a command
-            // then it will ignore the passive context and execute the matching command. If it does not match a command
-            // then it will append the provided string to the contexted string and re-execute.
-            res.setContext = function (cmdStr, contextMsg) {
-                res.context = {
-                    passive: {
-                        cmdStr: cmdStr,
-                        msg: contextMsg || cmdStr
-                    }
-                };
-            };
-            // Helper function to reset contexts.
-            res.resetContext = function () {
-                res.context = {};
-            };
-
-            // If all options passed validation then go ahead and invoke the command module.
-            if (okToInvoke) cmd.invoke.call(res, options, shell);
+            if (validateOptions(res, options, cmd))
+                cmd.invoke.call(res, options, shell);
         }
         // ...if the command does not exist then check to see if a passive context exists.
         else {
@@ -210,4 +110,99 @@ module.exports.Shell = function (cmdsDir) {
         // Return our result object to the application.
         return res;
     };
+
+    function validateOptions (res, options, cmd) {
+
+        // By default it is OK to invoke the command. This can be set false at any point if options do not pass
+        // validation.
+        var okToInvoke = true;
+
+        // If the command has pre-defined options then parse through them and validate against the supplied options.
+        if (cmd.options) {
+
+            var nonNamedIndex = 0;
+
+            // Loop through the command's pre-defined options.
+            for (var key in cmd.options) {
+
+                // The option defined by the command.
+                var definedOption = cmd.options[key];
+
+                // If option has named=false, attach non-named parameters as option and remove from `options._` array.
+                if (!(key in options) && definedOption.nodash && options._.length > 0) {
+                    options[key] = options._[nonNamedIndex];
+                    options._.splice(nonNamedIndex, 1);
+                }
+
+                // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
+                if (!definedOption.nodash && !(key in options) && definedOption.aliases) {
+                    definedOption.aliases.forEach(function (alias) {
+                        if (alias in options) {
+                            options[key] = options[alias];
+                            delete options[alias];
+                        }
+                    });
+                }
+
+                // If option was not supplied and prompt has a value other than false then prompt the user for the value.
+                if (!(key in options) && definedOption.prompt) {
+                    res.context.prompt = {
+                        option: key,
+                        cmd: cmd.name,
+                        options: options
+                    };
+                    if (typeof(definedOption.prompt) !== 'boolean')
+                        res.log(definedOption.prompt);
+                    else
+                        res.log('Enter value for ' + key + '.');
+                    // Return immediately without further validation.
+                    return false;
+                }
+
+                // If option has default value and was not found in supplied options then assign it.
+                if (definedOption.default && !(key in options))
+                    options[key] = definedOption.default;
+
+                // If defined option has a validate expression or function and the option was supplied then
+                // validate the supplied option against the expression or function.
+                if (definedOption.validate && (key in options)) {
+
+                    // If defined validation is a regular expression then validate the supplied value against it.
+                    if (definedOption.validate instanceof RegExp) {
+                        // If value does not pass validation then do not invoke command and write error message.
+                        if (!definedOption.validate.test(options[key])) {
+                            okToInvoke = false;
+                            res.error('invalid value for "' + key + '"');
+                        }
+                    }
+                    // If defined validation is a function then pass the value to it.
+                    else if (typeof(definedOption.validate) == 'function') {
+                        try {
+                            // If the validation function returns false then do not invoke the command and write
+                            // error message.
+                            if (!definedOption.validate(options[key])) {
+                                okToInvoke = false;
+                                res.error('invalid value for "' + key + '"');
+                            }
+                        }
+                        // If the provided validation function throws an error at any point then handle it
+                        // gracefully and simply fail validation.
+                        catch (ex) {
+                            okToInvoke = false;
+                            res.error('invalid value for "' + key + '"');
+                        }
+                    }
+                }
+
+                // If option is required but is not found in supplied options then error.
+                if (definedOption.required && !(key in options)) {
+                    okToInvoke = false;
+                    res.error('missing parameter "' + key + '"');
+                }
+            }
+        }
+
+        // If all options passed validation then okToInvoke will be true.
+        return okToInvoke;
+    }
 };

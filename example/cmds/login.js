@@ -4,10 +4,12 @@ exports.usage = '[username] [password]';
 
 exports.options = {
     username: {
+        prompt: true,
         nodash: true,
         description: 'Your username.'
     },
     password: {
+        prompt: true,
         nodash: true,
         description: 'Your password.'
     }
