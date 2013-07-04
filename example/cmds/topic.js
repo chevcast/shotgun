@@ -21,8 +21,6 @@ exports.invoke = function (res, options, shell) {
         res.setContext('topic ' + options.id);
     }
     else {
-        res.prompt('Please write your reply.', 'reply', function (reply) {
-            res.log('Your reply was: ' + reply);
-        });
+        res.log('Your reply was: ' + options.reply);
     }
 };
