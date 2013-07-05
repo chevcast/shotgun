@@ -4,7 +4,7 @@ exports.usage = '[options]';
 
 exports.options = {
     message: {
-        nodash: true,
+        noName: true,
         required: true,
         description: 'The message to be displayed.'
     },
@@ -13,11 +13,12 @@ exports.options = {
         required: true,
         default: 1,
         description: 'The number of times to display the message.',
-        validate: /^[1-9]\d*$/
+        validate: /^\d+$/
     }
 };
 
-exports.invoke = function (res, options, shell) {
+exports.invoke = function (options, shell) {
+    var res = this;
     for (var count = 0; count < options.iterations; count++)
         res.log(options.message);
 };

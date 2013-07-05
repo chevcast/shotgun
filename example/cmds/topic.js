@@ -4,7 +4,7 @@ exports.usage = '<id> [options]';
 
 exports.options = {
     id: {
-        nodash: true,
+        noName: true,
         required: true,
         description: 'The ID of the desired topic.'
     },
@@ -14,7 +14,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (res, options, shell) {
+exports.invoke = function (options, shell) {
     var res = this;
     if (!options.reply) {
         res.log('[topic ' + options.id + ' content]');

@@ -4,24 +4,22 @@ exports.usage = '[username] [password]';
 
 exports.options = {
     username: {
-        nodash: true,
+        prompt: true,
+        noName: true,
         description: 'Your username.'
     },
     password: {
-        nodash: true,
+        password: true,
+        prompt: true,
+        noName: true,
         description: 'Your password.'
     }
 };
 
-exports.invoke = function (res, options, shell) {
-    res.prompt('Please enter your username.', 'username', function (username) {
-        res.password = true;
-        res.prompt('Please enter your password.', 'password', function (password) {
-            res.password = false;
-            if (username.toLowerCase() === 'charlie' && password === 'password123')
-                res.log('Success!');
-            else
-                res.error('Username or password incorrect.');
-        });
-    });
+exports.invoke = function (options, shell) {
+    var res = this;
+    if (options.username.toLowerCase() === 'charlie' && options.password === 'password123')
+        res.log('Success!');
+    else
+        res.error('Username or password incorrect.');
 };

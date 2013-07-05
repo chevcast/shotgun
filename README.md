@@ -1,6 +1,6 @@
 # shotgun
 
-Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.
+Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it, including web applications. In fact, I took the liberty of writing a separate module called [shotgun-client](https://npmjs.org/package/shotgun-client) that makes it simple to integrate shotgun with any web application.
 
 ---
 
@@ -155,12 +155,31 @@ Shotgun command modules are just Node modules. There isn't anything special abou
     // cmds/echo.js
 
     // The invoke function is where the command logic will go.
-    exports.invoke = function (res, options, shell) {
+    exports.invoke = function (options, shell) {
+        var res = this;
         var iterations = options.iterations;
         for (var count = 0; count < iterations; count++) {
             res.log(options.message);
         }
     };
+
+Within the `invoke` function two parameters are passed in for you to use. The first is `options` which simply stores all the user-supplied options when invoking your command. The second option is the instance of the shotgun `shell`. The shell allows you to access other command modules via the `cmds` collection.
+
+In the body of the `invoke` function you also have access to a *result API* via the `this` keyword. As in the above example you may want to assign `this` to a variable in case you define your own functions within `invoke` where `this` would refer to a different scope. Within `invoke` the `this` keyword refers to a result object with some helper functions defined for you.
+
+### Helper Functions
+
+The result object's helper functions are as follows:
+
+`log` - Adds a line of text to the `lines` array on the result object.
+`warn` - Same as `log` except it changes the line's `type` property to "warn".
+`error` - Same as `warn` except `type` is set to "error".
+
+`warn` and `error` are useful for giving context to lines of text so that the UI can apply different styling behaviors when displaying the text to the user. For example your command might do something like `this.warn('The value supplied is below the minimum threshold.');` within the `invoke` function. This adds a line object to the `lines` array on the result object that will be passed to the application using shotgun. When the application iterates over the `lines` array it will see that the line has a property called `type` that is set to "error" and it will know to display the text differently from the normal `log` type.
+
+There are two other helper functions available known as `setContext` and `resetContext` but we'll go into more detail with those later in this README.
+
+### Optional Command Properties
 
 Command modules may also expose any of three other properties.
 
@@ -175,9 +194,10 @@ Command modules may also expose any of three other properties.
     // Options is an object containing a comprehensive list of parameters that the command accepts and understands.
     exports.options = {
         message: {
-            nodash: true,
+            noName: true,
             required: true,
-            description: 'The message to be displayed.'
+            description: 'The message to be displayed.',
+            prompt: true
         },
         iterations: {
             aliases: ['i'],
@@ -188,7 +208,7 @@ Command modules may also expose any of three other properties.
         }
     };
 
-Any options specified in the user input will be passed to the `invoke()` function of the command regardless of whether or not they appear in the command's `options` property. The `options` property is used to validate specific options that the command understands. For instance, in the above example we provided a regular expression to the validation property on the iterations option. You may also supply a function to the validate property if you need a more customized validation.
+Any options specified in the user input will be passed to the `invoke()` function of the command regardless of whether or not they appear in the command's `options` property. The `options` property is used to validate specific options that the command understands. For instance, in the above example we provided a regular expression to the validation property on the iterations option. You may also supply a function to the validate property if you need more customized validation.
 
     iterations: {
         aliases: ['i'],
@@ -200,7 +220,7 @@ Any options specified in the user input will be passed to the `invoke()` functio
         }
     }
 
-When you define options with `nodash` set to true, such as the message option in the above example, that lets shotgun know that this option will have no hyphenated name provided in the user input. Options without names will be added to the `options` object that is passed to the command's `invoke()` function in the order they are found in the parsed user input. For example:
+When you define options with `noName` set to true, such as the message option in the above example, that lets shotgun know that this option will have no hyphenated name provided in the user input. Options without names will be added to the `options` object that is passed to the command's `invoke()` function in the order they are found in the parsed user input. For example:
 
     echo "Dance monkey, dance!" -i 5
 
@@ -208,12 +228,12 @@ Using the sample 'echo' command we defined earlier the above sample user input w
 
     // cmds/echo.js
 
-    exports.invoke = function (res, options, shell) {
+    exports.invoke = function (options, shell) {
         options.iterations == 5; // true
         options.message == "Dance monkey, dance!"; // true
     };
 
-Since the `message` option has `nodash` set to true shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has `nodash` enabled.
+Since the `message` option has `noName` set to true shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has `noName` enabled.
 
 I stated earlier that named options are passed to the command even if they are not defined in the `options` property of that command. Thus, the following is valid:
 
@@ -223,15 +243,99 @@ would yield:
 
     // cmds/echo.js
 
-    exports.invoke = function (res, options, shell) {
+    exports.invoke = function (options, shell) {
         options.verbose == true; // true
     };
 
 Despite `verbose` not being defined as part of the `options` property, it is still accessible if provided by the user. It will just be optional and won't undergo any validation.
 
+### Defined Command Options
+
+As explained above, the user can supply any option they wish and your command module could access that value via the supplied `options` object. Defining `exports.options` on your command module is just a way to tell shotgun what options your module understands and what rules to apply to those options if they are found. Here is a comprehensive list of available properties you can set for each option you define for your command module:
+
+#### aliases
+
+    exports.options = {
+        message: {
+            aliases: ['m', 'msg']
+        }
+    };
+
+Sometimes you may not want the user to have to type `--message` as a parameter for your command every single time. You can supply aliases so that the user can supply one of the aliases instead. In the above example the user could supply `-m` or `--msg` instead of `--message` if they chose to.
+
+#### default
+
+    exports.options = {
+        message: {
+            default: 'Hello World'
+        }
+    };
+
+Defining options with a default value ensures that the option will have a value even if the user does not supply one. In the above example the user could supply a message, but if they don't then the default value of "Hello World" would be used.
+
+#### description
+
+    exports.options = {
+        message: {
+            description: "A message to be displayed."
+        }
+    };
+
+You don't have to supply a description, but if you do then it will show up when the user attempts to get help information for the command by typing `help commandName`.
+
+#### noName
+
+    exports.options = {
+        message: {
+            noName: true
+        }
+    };
+
+Supplying `noName: true` tells shotgun that this option does not have to be specified by name. For example, the user could supply `"some value"` instead of `--message "some value"`. Keep in mind that options with no name are evaluated in order. If you have two options with `noName: true` then the first user-supplied value without a name will be used for the first option you defined and the second user-supplied value with no name will be used for the second option. The order does not matter when options are supplied with a name, even if `noName` is true.
+
+#### password
+
+    exports.options = {
+        message: {
+            password: true
+        }
+    };
+
+Setting `password: true` only has an effect if a `prompt` is also set. This tells shotgun to set `result.password = true;` on the result object. If the UI chooses to it could use this password property to modify the UI input field to be a password field for the prompt. This is useful for a login command where the command will prompt the user for their password.
+
+#### prompt
+
+    exports.options = {
+        message: {
+            prompt: true // or prompt: 'Enter a message.'
+        }
+    };
+
+If you specify `prompt: true` on your option then the user will be prompted for the value if they do not supply it themselves. If `prompt` is set to true then it will prompt the user with a default message like "Enter value for message." You also have the option to supply your own message by simply replacing `true` with a string. The supplied string will be displayed instead of the default message.
+
+#### required
+
+    exports.options = {
+        message: {
+            required: true
+        }
+    };
+
+This is one of the simpler options. If you set `required: true` on an option then shotgun will display an error to the user if they do not supply a value. One caveat is if you supply a default value or a prompt because either the default value will be used if there is no user-supplied value or the user will be prompted for the value.
+
+#### validate
+
+    exports.options = {
+        message: {
+            validate: // Regular expression or function that accepts a value and returns true or false.
+        }
+    };
+
+Validate allows you to specify a regular expression or a function that will inform shotgun that the supplied value should be validated. If the value does not pass validation then an error will be displayed to the user and they will have to supply valid input before the command will be invoked.
+
 ### Our example 'echo' command
 
-What we've done in the above example is create a simple command called 'echo' that will be plugged into the shotgun shell framework simply by placing the module in the 'cmds' directory (or the directory you passed into the shell).
+What we did in a previous example is create a simple command called 'echo' that will be plugged into the shotgun shell framework simply by placing the module in the 'cmds' directory (or the directory you passed into the shell).
 
 The example command we just wrote is a pretty simple command. It performs a small task and only accepts one option. The nice thing about shotgun is that you don't have to do any pre-parsing of user input before passing it along to the module. Shotgun does all the legwork for you, allowing you to focus on creating well-designed command modules instead of worrying about user input, context, etc.
 
@@ -246,22 +350,27 @@ This would yield:
         lines: [
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'Hello world!'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'Hello world!'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'Hello world!'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'Hello world!'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'Hello world!'
             }
         ]
@@ -271,7 +380,7 @@ The lines are contained in an array. Each line object contains the text that wil
 
 ### The 'help' command
 
-Shotgun has a few built-in commands and one of those is 'help'. When the help command is specified by itself it lists all the available commands and their description message. The help command also accepts an argument, the name of a specific command. If a specific command is specified then the help command will print the command, its usage syntax, its description, and list all the available options (if any) for the command.
+Shotgun has a few built-in commands and one of those is 'help'. When the help command is specified by itself it lists all the available commands and their description message. The help command also accepts an argument, the name of a specific command. If a specific command is specified then the help command will print the command, its usage syntax, its description, and list all the defined available options (if any) for the command.
 
 The shell instance has an execute function. This is the primary entry point into the shotgun module. It takes in a command line string, parses it appropriately, and returns a result object.
 
@@ -286,18 +395,22 @@ This would yield:
         lines: [
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'clear        Clears the display.'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'echo         Displays the supplied text for a specified number of times.'
             }
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'exit         Exits the application.'
             },
             {
                 options: { charByChar: true },
+                type: 'log',
                 text: 'help         Displays general help info or info about a specific command.'
             }
         ]
@@ -309,14 +422,14 @@ The `shell.execute()` function always returns a result object. You may have noti
 
 The result object contains helper functions. While you could manually push an object to the lines array on the result object, it is far more convenient to use the provided helper functions. Below is an example of using the `log()` function.
 
-    exports.invoke = function (res, options, shell) {
-        res.log('This is an example of using the log() function.');
+    exports.invoke = function (options, shell) {
+        this.log('This is an example of using the log() function.');
     };
 
 Some functions, such as `log()` take an options object if needed. In the case of `log()` this object is added to each line object in the lines array.
 
-    exports.invoke = function (res, args, options) {
-        res.log('If possible, the UI should display this line bolded, italicized, and underlined.', {
+    exports.invoke = function (options, shell) {
+        this.log('If possible, the UI should display this line bolded, italicized, and underlined.', {
             bold: true,
             italic: true,
             underline: true
@@ -327,8 +440,8 @@ There are standard properties that shotgun always adds to the result object such
 
     // cmds/mycommand.js
 
-    exports.invoke = function (res, options, shell) {
-        res.customMessage = 'This is a custom message.';
+    exports.invoke = function (options, shell) {
+        this.customMessage = 'This is a custom message.';
     };
 
     // app.js
@@ -343,8 +456,8 @@ There are standard properties that shotgun always adds to the result object such
 
     // cmds/mycommand.js
 
-    exports.invoke = function (res, options, shell) {
-        res.log('Custom value: ' + options.someValue);
+    exports.invoke = function (options, shell) {
+        this.log('Custom value: ' + options.someValue);
     };
 
 Values supplied in this manner will override user input that matches it, so be mindful of the options you pass in. For example:
@@ -357,100 +470,9 @@ will yield:
 
     // cmds/mycommand.js
 
-    exports.invoke = function (res, options, shell) {
+    exports.invoke = function (options, shell) {
         options.someValue; // 'bacon'
     };
-
-### Prompting the user for a value.
-
-Shotgun wants to make it extremely easy for you to write command modules. To that end shotgun provides you with an easy API that can be used to prompt the user for a value.
-
-    exports.invoke = function (res, options, shell) {
-        res.prompt('Please enter a value.', function (value) {
-            // do something with value.
-        });
-    };
-
-The simplest usage of `res.prompt()` simply gets a value from the user. That value is then provided to your callback function. A lot of context magic happens behind the scenes to make this happen but the result is a clean API for you to use when writing command modules. Optionally, you can prompt the user for a specific option name. Here's an example.
-
-    exports.invoke = function (res, options, shell) {
-        res.prompt('Please enter a username.', 'username', function (username) {
-            res.log('Welcome ' + username + '!');
-        });
-    };
-
-When prompt is provided a variable name, in this case "username", it will first check the supplied options object to see if that variable was provided. If it was then it immediately invokes the callback and passes in the value without prompting the user for anything. If the value is not found on the options object then it will prompt the user for the value. This allows the user to do things like this:
-
-> $ login  
-> Please enter a username.  
-> $ charlie  
-> Welcome charlie!
-
-or the user could specify username up front and skip the prompt altogether!
-
-> $ login --username charlie  
-> Welcome charlie!
-
-Keep in mind that if the option you are prompting for is defined as a **required** option on your command then shotgun will complain if the value is not supplied before it even calls your `invoke()` function. Similarly, if your option has a default value defined then the user will never be prompted because the prompt helper will see the default value and use that if it is not supplied.
-
-Prompts are also capable of being nested if needed.
-
-    exports.invoke = function (res, options, shell) {
-        res.prompt('Please enter a username.', 'username', function (username) {
-            res.prompt('Please enter your password.', 'password', function (password) {
-                if (username.toLowerCase() === 'charlie' && password === 'password123') {
-                    res.log('Success!');
-                }
-                else {
-                    res.error('Username or password incorrect.');
-                }
-            });
-        });
-    };
-
-This short little snippet would allow the user to supply the values several ways.
-
-> $ login  
-> Please enter a username.  
-> $ charlie  
-> Please enter your password.  
-> $ password123  
-> Success!
-
-or
-
-> $ login --username charlie  
-> Please enter your password.  
-> $ password123  
-> Success!
-
-or
-
-> $ login --username charlie --password password123  
-> Success!
-
-It gets even better though. If you define options on your command with `nodash` set to true then you can omit the '--username' and '--password' identifiers.
-
-    exports.options = {
-        username: {
-            nodash: true
-        },
-        password: {
-            nodash: true
-        }
-    };
-
-Now that you've defined those options on your command the user no longer has to include the hyphenated option identifiers.
-
-> $ login charlie password123  
-> Success!
-
-Because shotgun is UI agnostic we don't have convenient console functionality like CTRL + C to end a current action. To mitigate that shotgun looks for the special user input "cancel" and will cancel the active prompt.
-
-> $ login  
-> Please enter a username.  
-> $ cancel  
-> prompt canceled
 
 ### Setting a helpful command context.
 
@@ -463,7 +485,7 @@ Command contexts are extremely helpful and save the user a lot of keystrokes. Ba
 
 The user is forced to type the entire 'topic 123' command over again just so he/she can supply the '-r' flag. With command contexts your topic command can simply do this:
 
-    res.setContext('topic 123');
+    this.setContext('topic 123');
 
 This simple helper will setup a command context. Now all the user's input will be appended to that context. The new user experience will be something like this:
 
@@ -483,6 +505,4 @@ The full command is expanded out to 'topic 123 -r' because shotgun knows that 't
 
 Notice how the user was able to run the 'help' command after the 'topic 123' context was set. When the 'help' command finished the user was still able to supply just the '-r' because the context was still active. The default 'clear' command resets the active context but if you do need to clear the active context anywhere else in your command modules then you can run the following helper:
 
-    res.resetContext();
-
-Context is even preserved across prompts. The prompt will take over temporarily and prompt the user for a value but will immediately restore the previous context, if any, when it is finished.
+    this.resetContext();

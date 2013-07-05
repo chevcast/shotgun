@@ -4,7 +4,7 @@ exports.usage = '[options]';
 
 exports.options = {
     message: {
-        nodash: true,
+        noName: true,
         required: true,
         description: 'The message to be displayed.'
     },

@@ -4,7 +4,7 @@ exports.usage = '[command]';
 
 exports.options = {
     command: {
-        nodash: true,
+        noName: true,
         description: 'Get more information about a specific command.'
     }
 };

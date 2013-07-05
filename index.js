@@ -52,11 +52,6 @@ module.exports.Shell = function (cmdsDir) {
         // Define our response object. This is the object we will return.
         var res = new CommandResponse(context);
 
-        // If there is no context then print the user's supplied value to the display.
-        if (!context) {
-            res.log('> ' + cmdStr);
-        }
-
         // If no command string was supplied then write an error message.
         if (!cmdStr)
             res.error('You must supply a value.');
@@ -129,13 +124,13 @@ module.exports.Shell = function (cmdsDir) {
                 var definedOption = cmd.options[key];
 
                 // If option has named=false, attach non-named parameters as option and remove from `options._` array.
-                if (!(key in options) && definedOption.nodash && options._.length > 0) {
+                if (!(key in options) && definedOption.noName && options._.length > 0) {
                     options[key] = options._[nonNamedIndex];
                     options._.splice(nonNamedIndex, 1);
                 }
 
                 // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
-                if (!definedOption.nodash && !(key in options) && definedOption.aliases) {
+                if (!definedOption.noName && !(key in options) && definedOption.aliases) {
                     definedOption.aliases.forEach(function (alias) {
                         if (alias in options) {
                             options[key] = options[alias];
@@ -151,6 +146,8 @@ module.exports.Shell = function (cmdsDir) {
                         cmd: cmd.name,
                         options: options
                     };
+                    if (definedOption.password)
+                        res.password = true;
                     if (typeof(definedOption.prompt) !== 'boolean')
                         res.log(definedOption.prompt);
                     else
