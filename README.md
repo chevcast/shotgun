@@ -311,7 +311,7 @@ Setting `password: true` only has an effect if a `prompt` is also set. This tell
         }
     };
 
-If you specify `prompt: true` on your option then the user will be prompted for the value if they do not supply it themselves. If `prompt` is set to true then it will prompt the user with a default message like "Enter value for message." You also have the option to supply your own message by simply replacing `true` with a string. The supplied string will be displayed instead of the default message.
+If you specify `prompt: true` on your option and `required` is also true then the user will be prompted for the value if they did not supply the option themselves. If `prompt` is true but `required` is not set to true and the user supplied the option with no value then they will be prompted. If `prompt` is set to true then it will prompt the user with a default message like "Enter value for message." You also have the option to supply your own message by simply replacing `true` with a string. The supplied string will be displayed instead of the default message.
 
 #### required
 
