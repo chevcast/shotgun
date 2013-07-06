@@ -139,21 +139,25 @@ module.exports.Shell = function (cmdsDir) {
                     });
                 }
 
-                // If option was not supplied and prompt has a value other than false then prompt the user for the value.
-                if (!(key in options) && definedOption.prompt) {
-                    res.context.prompt = {
-                        option: key,
-                        cmd: cmd.name,
-                        options: options
-                    };
-                    if (definedOption.password)
-                        res.password = true;
-                    if (typeof(definedOption.prompt) !== 'boolean')
-                        res.log(definedOption.prompt);
-                    else
-                        res.log('Enter value for ' + key + '.');
-                    // Return immediately without further validation.
-                    return false;
+                // Prompt the user for value if:
+                // A) The option was not supplied and it is required.
+                // B) The option was supplied but without a value.
+                if (definedOption.prompt) {
+                    if ((!(key in options) && definedOption.required) || (key in options && options[key] === true)) {
+                        res.context.prompt = {
+                            option: key,
+                            cmd: cmd.name,
+                            options: options
+                        };
+                        if (definedOption.password)
+                            res.password = true;
+                        if (typeof(definedOption.prompt) !== 'boolean')
+                            res.log(definedOption.prompt);
+                        else
+                            res.log('Enter value for ' + key + '.');
+                        // Return immediately without further validation.
+                        return false;
+                    }
                 }
 
                 // If option has default value and was not found in supplied options then assign it.

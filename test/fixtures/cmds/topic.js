@@ -9,6 +9,7 @@ exports.options = {
         description: 'The ID of the desired topic.'
     },
     reply: {
+        prompt: 'Enter your reply.',
         aliases: ['r'],
         description: 'Specify to write a reply to the topic.'
     }

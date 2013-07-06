@@ -121,6 +121,16 @@ describe('Shotgun', function () {
             result.lines[0].should.have.property('text', 'Your reply was: this is my reply');
         });
 
+        it('should prompt user for value if user supplies option with now value.', function () {
+            var result = shell.execute('topic 123');
+            should.exist(result);
+            result = shell.execute('-r', result.context);
+            should.exist(result);
+            result.should.have.property('lines').with.length(1);
+            result.lines[0].should.have.property('type', 'log');
+            result.lines[0].should.have.property('text', 'Enter your reply.');
+        });
+
         it('should clear the context when clear command is issued.', function () {
             var result = shell.execute('topic 123');
             should.exist(result);
