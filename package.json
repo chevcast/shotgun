@@ -4,9 +4,9 @@
   "description": "Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, Shotgun returns a result object that acts as a set of instructions so that any application can easily consume it.",
   "main": "./index",
   "dependencies": {
-    "optimist": "~0.3.5",
-    "shell-quote": "0.0.1",
-    "node.extend": "~1.0.0"
+    "optimist": "~0.6.0",
+    "shell-quote": "1.3.3",
+    "node.extend": "~1.0.7"
   },
   "devDependencies": {
     "mocha": "*",
