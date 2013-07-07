@@ -17,13 +17,13 @@ module.exports.Shell = function (cmdsDir, disabledModules) {
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function(cmdPath) {
         var cmd = require(cmdPath);
+        var cmdName = path.basename(cmdPath, '.js').toLowerCase();
         if (cmd && cmd.invoke) {
-            var cmdName = path.basename(cmdPath, '.js').toLowerCase();
             cmd.name = cmdName.toLowerCase();
             shell.cmds[cmdName] = cmd;
         }
         else
-            console.warn('"%s" is not a valid shotgun command module and was not loaded.', file);
+            console.warn('%s.js is not a valid shotgun command module and was not loaded.', cmdName);
     };
 
     // Reads all command modules from the specified directory and loads them.
