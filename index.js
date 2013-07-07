@@ -42,9 +42,10 @@ module.exports.Shell = function (cmdsDir, disabledModules) {
     shell.readCommandModules(path.resolve(__dirname, 'defaultCmds'));
 
     // Remove any default command modules specified in disabledModules.
-    disabledModules.forEach(function (disabledCmd) {
-        delete shell.cmds[disabledCmd];
-    });
+    if (disabledModules)
+        disabledModules.forEach(function (disabledCmd) {
+            delete shell.cmds[disabledCmd];
+        });
 
     // Read in application command modules next.
     shell.readCommandModules(cmdsDir || 'cmds');
