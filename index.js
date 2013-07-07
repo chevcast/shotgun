@@ -6,7 +6,7 @@ var fs = require('fs'),
     CommandResponse = require('./CommandResponse');
 
 // Define the shell object.
-module.exports.Shell = function (cmdsDir) {
+module.exports.Shell = function (cmdsDir, disabledModules) {
 
     // Alias 'this' so we can access in other scopes.
     var shell = this;
@@ -14,34 +14,40 @@ module.exports.Shell = function (cmdsDir) {
     // This property will store all the available command modules.
     shell.cmds = {};
 
-    // Reads all command modules from the specified directory and adds them to shell.cmds.
-    function readCommands(dir) {
+    // Load specified command module into shell.cmds.
+    shell.loadCommandModule = function(cmdPath) {
+        var cmd = require(cmdPath);
+        if (cmd && cmd.invoke) {
+            var cmdName = path.basename(cmdPath, '.js').toLowerCase();
+            cmd.name = cmdName.toLowerCase();
+            shell.cmds[cmdName] = cmd;
+        }
+        else
+            console.warn('"%s" is not a valid shotgun command module and was not loaded.', file);
+    };
+
+    // Reads all command modules from the specified directory and loads them.
+    shell.readCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
             if (files) {
                 files.forEach(function (file) {
-                    var cmd = require(path.resolve(dir, file));
-                    if (cmd && cmd.invoke) {
-                        var cmdName = path.basename(file, '.js').toLowerCase();
-                        if (!(cmdName in shell.cmds)){
-                            cmd.name = cmdName.toLowerCase();
-                            shell.cmds[cmdName] = cmd;
-                        }
-                        else
-                            console.warn('"%s" was not loaded because a command with the same name was already loaded.', dir + '/' + file);
-                    }
-                    else
-                        console.warn('"%s" is not compatible with shotgun-shell and was not loaded.', file);
+                    shell.loadCommandModule(path.resolve(dir, file));
                 });
             }
         }
-    }
+    };
 
-    // Read in user provided commands first.
-    readCommands(cmdsDir || 'cmds');
-    // Read in default commands provided by shotgun second. This way the user can define commands with the same name
-    // as default commands and they will automatically override the default commands.
-    readCommands(path.resolve(__dirname, 'defaultCmds'));
+    // Read in default command modules first.
+    shell.readCommandModules(path.resolve(__dirname, 'defaultCmds'));
+
+    // Remove any default command modules specified in disabledModules.
+    disabledModules.forEach(function (disabledCmd) {
+        delete shell.cmds[disabledCmd];
+    });
+
+    // Read in application command modules next.
+    shell.readCommandModules(cmdsDir || 'cmds');
 
     // The main entry point into Shotgun.
     // cmdStr - the user-provided command string, with arguments.

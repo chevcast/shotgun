@@ -1,6 +1,6 @@
 var prompt = require('prompt'),
     shotgun = require('../index'),
-    shell = new shotgun.Shell(),
+    shell = new shotgun.Shell('cmds', ['exit']),
     context = {};
 
 function callback(err, val) {
