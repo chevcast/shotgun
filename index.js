@@ -11,6 +11,9 @@ module.exports.Shell = function (cmdsDir, disabledModules) {
     // Alias 'this' so we can access in other scopes.
     var shell = this;
 
+    // Set namespace for this shell instance.
+    this.namespace = cmdsDir || 'cmds';
+
     // This property will store all the available command modules.
     shell.cmds = {};
 
@@ -48,7 +51,7 @@ module.exports.Shell = function (cmdsDir, disabledModules) {
         });
 
     // Read in application command modules next.
-    shell.readCommandModules(cmdsDir || 'cmds');
+    shell.readCommandModules(shell.namespace);
 
     // The main entry point into Shotgun.
     // cmdStr - the user-provided command string, with arguments.
