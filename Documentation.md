@@ -91,6 +91,10 @@ This helper function is identical to log except it writes the value "error" to t
 
 This helper function is identical to log except it writes the value "warn" to the `type` property.
 
+#### debug(text:string, options:object)
+
+This helper function is identical to log except it writes the value "debug" to the `type` property.
+
 #### setContext(cmdStr:string, contextMsg:string)
 
 This helper function allows a command module to set a passive context. Any further input from the user will be appended to the supplied command string (`cmdStr`). The context message (`contextMsg`) is a simple string that sets a property on the context object. Nothing is really done with it, but some applications that consume shotgun like to display the context message to the left of the user input field to provide visual representation of the current context.

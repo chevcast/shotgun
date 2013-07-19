@@ -38,6 +38,15 @@ module.exports = exports = function (context) {
         });
     };
 
+    // Helper function to add simple warning text to the res.lines array.
+    res.debug = function (text, options) {
+        res.lines.push({
+            options: options || {},
+            type: 'debug',
+            text: text || ''
+        });
+    };
+
     // Helper function for setting up passive contexts. If the user-provided command string matches a command
     // then it will ignore the passive context and execute the matching command. If it does not match a command
     // then it will append the provided string to the contexted string and re-execute.
