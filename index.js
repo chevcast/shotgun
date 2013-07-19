@@ -6,13 +6,14 @@ var fs = require('fs'),
     CommandResponse = require('./CommandResponse');
 
 // Define the shell object.
-module.exports.Shell = function (cmdsDir, disabledModules) {
+module.exports.Shell = function (cmdsDir, namespace, disabledModules) {
 
     // Alias 'this' so we can access in other scopes.
     var shell = this;
 
-    // Set namespace for this shell instance.
-    this.namespace = cmdsDir || 'cmds';
+    // Set namespace for this shell instance. If no namespace is supplied then use the cmdsDir.
+    // If no cmdsDir is specified then use 'cmds' by default.
+    shell.namespace = namespace || cmdsDir || 'cmds';
 
     // This property will store all the available command modules.
     shell.cmds = {};

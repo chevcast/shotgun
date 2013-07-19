@@ -14,7 +14,7 @@ module.exports = exports = function (context) {
     // Helper function to add simple lines of text to the res.lines array.
     res.log = function (text, options) {
         res.lines.push({
-            options: options,
+            options: options || {},
             type: 'log',
             text: text || ''
         });
@@ -23,7 +23,7 @@ module.exports = exports = function (context) {
     // Helper function to add simple error text to the res.lines array.
     res.error = function (text, options) {
         res.lines.push({
-            options: options,
+            options: options || {},
             type: 'error',
             text: text || ''
         });
@@ -32,7 +32,7 @@ module.exports = exports = function (context) {
     // Helper function to add simple warning text to the res.lines array.
     res.warn = function (text, options) {
         res.lines.push({
-            options: options,
+            options: options || {},
             type: 'warn',
             text: text || ''
         });
