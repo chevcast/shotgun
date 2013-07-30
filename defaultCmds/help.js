@@ -23,7 +23,8 @@ exports.invoke = function (options, shell) {
                 helpStr += new Array((maxLength - key.length) + 7).join(' ');
                 helpStr += cmd.description;
             }
-            res.log(helpStr);
+            if (!cmd.hidden)
+                res.log(helpStr);
         }
     }
     else {
