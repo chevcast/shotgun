@@ -6,11 +6,15 @@
 
 ### Constructor
 
-**cmdsDir (string)** - If specified then shotgun will use this directory to look for your command modules.
+#### options
 
-**namespace (string)** - Identifies this shell instance. Particularly useful when shotgun-client is used to create browser consoles.
+An optional object containing various options.
 
-**disabledModules (array)** - Optionally pass in an array of strings that match command module names. Any loaded modules that match any items in this array will be unloaded. This is useful for preventing default command modules from loading.
+**cmdsDir (string)** - If specified then shotgun will use this directory to look for your command modules. Defaults to 'shotgunCmds'.
+
+**namespace (string)** - Identifies this shell instance. Particularly useful when shotgun-client is used to create browser consoles. Defaults to 'shotgun'.
+
+**defaultModules (object)** - Any default command modules will appear as properties here and are set to 'true' by default. You can set any or all of them to false if needed and they will not load.
 
 ### Properties
 

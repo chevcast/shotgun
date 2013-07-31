@@ -20,7 +20,7 @@ To use shotgun you simply require it and create an instance of the shell.
     var shotgun = require('shotgun');
     var shell = new shotgun.Shell();
 
-The shell optionally accepts a path (relative to the current working directory) to look for your custom command modules. If no directory is specified then 'cmds' is used by default. Shotgun will automatically read in and `require()` all node modules in the specified directory and it will plug them into the framework as commands as long as they expose the required properties and functions.
+The shell optionally accepts an options object. One of the options available is `cmdsDir` which is a path to the directory containing your custom command modules (relative to the current working directory). If no directory is specified then 'shotgunCmds' is used by default. Shotgun will automatically read in and `require()` all node modules in the specified directory and it will plug them into the framework as commands as long as they expose the required properties and functions.
 
 ---
 
