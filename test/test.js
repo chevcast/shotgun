@@ -2,7 +2,9 @@ var should = require('chai').should(),
     shotgun = require('../index');
 
 describe('Shotgun', function () {
-    var shell = new shotgun.Shell('test/fixtures/cmds');
+    var shell = new shotgun.Shell({
+        cmdsDir: 'test/fixtures/cmds'
+    });
 
     describe('shell', function () {
 

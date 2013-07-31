@@ -2,18 +2,30 @@ var fs = require('fs'),
     path = require('path'),
     optimist = require('optimist'),
     shellQuote = require('shell-quote'),
-    extend = require('node.extend'),
-    CommandResponse = require('./CommandResponse');
+    extend = require('extend'),
+    CommandResponse = require('./CommandResponse'),
+    defaultOptions = {
+        namespace: 'shotgun',
+        cmdsDir: 'shotgunCmds',
+        defaultCmds: {
+            clear: true,
+            help: true,
+            exit: true
+        }
+    };
 
 // Define the shell object.
-module.exports.Shell = function (cmdsDir, namespace, disabledModules) {
+module.exports.Shell = function (options) {
+
+    // Extend default options with user supplied options.
+    var settings = extend(true, {}, defaultOptions, options);
 
     // Alias 'this' so we can access in other scopes.
     var shell = this;
 
     // Set namespace for this shell instance. If no namespace is supplied then use the cmdsDir.
     // If no cmdsDir is specified then use 'cmds' by default.
-    shell.namespace = namespace || cmdsDir || 'cmds';
+    shell.namespace = settings.namespace;
 
     // This property will store all the available command modules.
     shell.cmds = {};
@@ -42,17 +54,14 @@ module.exports.Shell = function (cmdsDir, namespace, disabledModules) {
         }
     };
 
-    // Read in default command modules first.
-    shell.readCommandModules(path.resolve(__dirname, 'defaultCmds'));
+    // Load default command modules.
+    for (var key in settings.defaultCmds) {
+        if (settings.defaultCmds[key])
+            shell.loadCommandModule(path.resolve(__dirname, 'defaultCmds', key + '.js'));
+    }
 
-    // Remove any default command modules specified in disabledModules.
-    if (disabledModules)
-        disabledModules.forEach(function (disabledCmd) {
-            delete shell.cmds[disabledCmd];
-        });
-
-    // Read in application command modules next.
-    shell.readCommandModules(shell.namespace);
+    // Load custom command modules.
+    shell.readCommandModules(settings.cmdsDir);
 
     // The main entry point into Shotgun.
     // cmdStr - the user-provided command string, with arguments.
