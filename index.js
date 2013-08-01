@@ -18,15 +18,15 @@ var fs = require('fs'),
 // Define the shell object.
 module.exports.Shell = function (options) {
 
-    // Extend default options with user supplied options.
-    var settings = extend(true, {}, defaultOptions, options);
-
     // Alias 'this' so we can access in other scopes.
     var shell = this;
 
+    // Extend default options with user supplied options.
+    shell.settings = extend(true, {}, defaultOptions, options);
+
     // Set namespace for this shell instance. If no namespace is supplied then use the cmdsDir.
     // If no cmdsDir is specified then use 'cmds' by default.
-    shell.namespace = settings.namespace;
+    shell.namespace = shell.settings.namespace;
 
     // This property will store all the available command modules.
     shell.cmds = {};
@@ -56,13 +56,13 @@ module.exports.Shell = function (options) {
     };
 
     // Load default command modules.
-    for (var key in settings.defaultCmds) {
-        if (settings.defaultCmds[key])
+    for (var key in shell.settings.defaultCmds) {
+        if (shell.settings.defaultCmds[key])
             shell.loadCommandModule(path.resolve(__dirname, 'defaultCmds', key + '.js'));
     }
 
     // Load custom command modules.
-    shell.readCommandModules(settings.cmdsDir);
+    shell.readCommandModules(shell.settings.cmdsDir);
 
     // The main entry point into Shotgun.
     // cmdStr - the user-provided command string, with arguments.
@@ -71,7 +71,7 @@ module.exports.Shell = function (options) {
     shell.execute = function (cmdStr, context, options) {
 
         // Define our response object. This is the object we will return.
-        var res = extend({}, new CommandResponse(context), settings.helpers);
+        var res = extend({}, new CommandResponse(context), shell.settings.helpers);
 
         // If no command string was supplied then write an error message.
         if (!cmdStr)

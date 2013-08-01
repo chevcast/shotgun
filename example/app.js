@@ -6,7 +6,6 @@ var prompt = require('prompt'),
         }
     }),
     context = {};
-
 function callback(err, val) {
     var result = {}, exit = false;
     if (!err && val.cmdStr) {
