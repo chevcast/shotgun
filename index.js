@@ -11,7 +11,8 @@ var fs = require('fs'),
             clear: true,
             help: true,
             exit: true
-        }
+        },
+        helpers: {}
     };
 
 // Define the shell object.
@@ -70,7 +71,7 @@ module.exports.Shell = function (options) {
     shell.execute = function (cmdStr, context, options) {
 
         // Define our response object. This is the object we will return.
-        var res = new CommandResponse(context);
+        var res = extend({}, new CommandResponse(context), settings.helpers);
 
         // If no command string was supplied then write an error message.
         if (!cmdStr)
