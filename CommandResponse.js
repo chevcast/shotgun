@@ -3,10 +3,7 @@ module.exports = exports = function (context) {
     var res = this;
 
     // Attach existing context object to response or create a new one.
-    if (context)
-        res.context = context;
-    else
-        res.context = {};
+    res.context = context;
 
     // Create an array to store lines of text.
     res.lines = [];
@@ -59,6 +56,7 @@ module.exports = exports = function (context) {
 
     // Helper function to reset contexts.
     res.resetContext = function () {
-        res.context = {};
+        if (res.context.hasOwnProperty('passive'))
+            delete res.context.passive;
     };
 };

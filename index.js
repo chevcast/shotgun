@@ -73,8 +73,12 @@ module.exports.Shell = function (options) {
     // context - this object is used to maintain state across multiple executions. Pass in res.context.
     shell.execute = function (cmdStr, context, options) {
 
+        // If no context was supplied then create one.
+        if (!context) context = {};
+
         // Define our response object. This is the object we will return.
-        var res = extend({}, new CommandResponse(context), shell.helpers);
+        var res = new CommandResponse(context);
+        extend(res, shell.helpers);
 
         // If no command string was supplied then write an error message.
         if (!cmdStr)
@@ -88,42 +92,48 @@ module.exports.Shell = function (options) {
             cmdName = args[0];
         }
 
-        // If a prompt context exists then override command and options with those stored in the context...
-        if (context && context.prompt) {
-            if (cmdStr.toLowerCase() !== 'cancel') {
+        if (cmdStr.toLowerCase() !== 'cancel') {
+            // If a prompt context exists then override command and options with those stored in the context...
+            if (context.prompt) {
                 cmdName = context.prompt.cmd;
                 options = context.prompt.options;
                 options[context.prompt.option] = cmdStr;
                 delete res.context.prompt;
             }
+            // ...otherwise remove the command name from the args array and build our options object.
             else {
+                args.splice(0, 1);
+                options = extend(optimist(args).argv, options);
+            }
+
+            // Get reference to the command module by name.
+            var cmd = shell.cmds[cmdName.toLowerCase()];
+
+            // If the command module exists then process it's options and invoke the module...
+            if (cmd) {
+                if (validateOptions(res, options, cmd))
+                    cmd.invoke.call(res, options, shell);
+            }
+            /// ...otherwise check to see if a passive context exists.
+            else {
+                // If a passive context exists then rerun 'execute' passing in the command string stored in the context...
+                if (context.passive)
+                    res = shell.execute(context.passive.cmdStr + ' ' + cmdStr, context);
+                // ...otherwise it must be an invalid command.
+                else
+                    res.error('"' + cmdName + '" is not a valid command.');
+            }
+        }
+        else {
+            // If prompt exists then cancel it...
+            if (context.prompt){
                 res.warn('prompt canceled');
-                res.context = context.prompt.previousContext;
+                delete res.context.prompt;
             }
-        }
-        // ...otherwise remove the command name from the args array and build our options object.
-        else {
-            args.splice(0, 1);
-            options = extend(optimist(args).argv, options);
-        }
+            // ...otherwise inform user there is no active prompt.
+            else
+                res.error('no active prompt');
 
-        // Get reference to the command module by name.
-        var cmd = shell.cmds[cmdName.toLowerCase()];
-
-        // If the command module exists then process it's options and invoke the module...
-        if (cmd) {
-            if (validateOptions(res, options, cmd))
-                cmd.invoke.call(res, options, shell);
-        }
-        // ...if the command does not exist then check to see if a passive context exists.
-        else {
-            // If a passive context exists then rerun 'execute' passing in the command string stored in the context...
-            if (context && context.passive && context.passive.cmdStr) {
-                res = shell.execute(context.passive.cmdStr + ' ' + cmdStr, context);
-            }
-            // If no context exists and the user did not provide the value 'cancel' then write invalid command error.
-            else if (cmdName.toLowerCase() !== 'cancel')
-                res.error('"' + cmdName + '" is not a valid command.');
         }
 
         // Return our result object to the application.
