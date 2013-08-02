@@ -10,8 +10,7 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "chai": "*",
-    "prompt": "*"
+    "chai": "*"
   },
   "scripts": {
     "test": "mocha -R tap"
