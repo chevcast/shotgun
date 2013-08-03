@@ -24,7 +24,7 @@ exports.invoke = function (options, shell) {
                 helpStr += cmd.description;
             }
             if (!cmd.hidden)
-                res.log(helpStr);
+                res.log(helpStr, { dontType: true });
         }
     }
     else {
@@ -33,11 +33,11 @@ exports.invoke = function (options, shell) {
             res.error(options.command + ' is not a valid command name.');
         else {
             if (cmd.description) {
-                res.log(cmd.description);
+                res.log(cmd.description, { dontType: true });
                 res.log();
             }
             if (cmd.usage) {
-                res.log(options.command + ' ' + cmd.usage);
+                res.log(options.command + ' ' + cmd.usage, { dontType: true });
                 res.log();
             }
             if (cmd.options) {
@@ -61,7 +61,7 @@ exports.invoke = function (options, shell) {
                         optionStr += new Array((maxLength - optionStr.length) + 5).join(' ');
                         optionStr += option.description;
                     }
-                    res.log(optionStr);
+                    res.log(optionStr, { dontType: true });
                 }
             }
         }
