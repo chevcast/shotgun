@@ -57,13 +57,15 @@ exports.invoke = function (options, shell) {
 
             // Display the command's description if it has one.
             if (cmd.description) {
-                res.log(cmd.description, { dontType: true });
+                res.log(cmd.description);
                 res.log();
             }
 
             // If a "usage key" is specified then display it.
             if (cmd.usage) {
-                res.log(options.command + ' ' + cmd.usage, { dontType: true });
+                res.log('Usage:');
+                res.log();
+                res.log(options.command + ' ' + cmd.usage);
                 res.log();
             }
 
@@ -82,6 +84,9 @@ exports.invoke = function (options, shell) {
                     strs.push({ option: option, str: optionStr});
                     maxLength = optionStr.length > maxLength ? optionStr.length : maxLength;
                 }
+                
+                res.log('Options:');
+                res.log();
                 for (var index in strs) {
                     var option = strs[index].option,
                         optionStr = strs[index].str;
