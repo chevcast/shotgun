@@ -12,7 +12,8 @@ var fs = require('fs'),
             help: true,
             exit: true
         },
-        helpers: {}
+        helpers: {},
+        debug: false
     };
 
 // Define the shell object.
@@ -42,7 +43,7 @@ module.exports.Shell = function (options) {
             cmd.name = cmdName.toLowerCase();
             shell.cmds[cmdName] = cmd;
         }
-        else
+        else if (settings.debug)
             console.warn('%s.js is not a valid shotgun command module and was not loaded.', cmdName);
     };
 
