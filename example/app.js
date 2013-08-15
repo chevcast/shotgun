@@ -1,10 +1,6 @@
 var readline = require('readline'),
     shotgun = require('../index'),
-    shell = new shotgun.Shell({
-        defaultCmds: {
-            exit: false
-        }
-    }),
+    shell = new shotgun.Shell(),
     context = {};
 
 var rl = readline.createInterface({

@@ -28,123 +28,115 @@ The shell optionally accepts an options object. One of the options available is 
 
 Once you've setup shotgun and instantiated the shell you can build any UI application around it that you wish. The simplest application is just a basic console app so that's what we'll setup here.
 
-1. First you'll need to install a module to help with reading values from the console so that you can pass them into your shotgun shell.
-    > npm install prompt
+1. First set up a basic app to continually get a value from the user.
 
-2. Next set up a basic app to continually get a value from the user.
+        var readline = require('readline');
 
-        var prompt = require('prompt');
-        function callback(err, val) {
-            if (!err && val.cmdStr) {
-                console.log("Echo: " + val.cmdStr);
-            }
-            prompt.get('cmdStr', callback);
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        function parseInput(cmdStr) {
+            console.log("Echo: %s", cmdStr);
+            rl.question("> ", parseInput); // Rinse and repeat.
         }
-        prompt.get('cmdStr', callback);
+
+        rl.question("> ", parseInput);
 
     So far we haven't done anything with shotgun. We've just put together a small app the continually asks the user for input and then prints that input to the console.
 
-    > prompt: cmdStr: test  
-    > Echo: test
+    > test
+    Echo: test
 
 3. Once you have a proper prompt application setup go ahead and install shotgun.
     > npm install shotgun
 
 4. Require shotgun and instantiate a shell.
 
-        var prompt = require('prompt'),
+        var readline = require('readline'),
             shotgun = require('shotgun'),
             shell = new shotgun.Shell();
 
-        function callback(err, val) {
-            if (!err && val.cmdStr) {
-                console.log("Echo: " + val.cmdStr);
-            }
-            prompt.get('cmdStr', callback);
-        }
-        prompt.get('cmdStr', callback);
+        ...
 
 5. Now that you have an instance of the shell you can begin to pass the user's value into the `execute()` function.
 
-        var prompt = require('prompt'),
-            shotgun = require('shotgun'),
+        var readline = require('readline'),
+            shotgun = require('../index'),
             shell = new shotgun.Shell();
 
-        function callback(err, val) {
-            var result = {};
-            if (!err && val.cmdStr) {
-                result = shell.execute(val.cmdStr);
-            }
-            prompt.get('cmdStr', callback);
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        function parseInput(cmdStr) {
+            var result = shell.execute(cmdStr);
+            rl.question("> ", parseInput); // Rinse and repeat.
         }
-        prompt.get('cmdStr', callback);
+
+        rl.question("> ", parseInput);
 
 6. So far all we've done is pass the user's input on to shotgun and get back a `result` object, but we're not yet using it for anything. The `result` object returned from shotgun acts as a set of instructions. Depending on the command modules installed the result object could contain a wide variety of properties for you to consume in your application. There are a few default commands that come with shotgun: clear, exit, and help. 'clear' sets a property on the result called `clearDisplay`. 'exit' sets a property on the result called `exit`. 'help' writes a bunch of objects to a `lines` array on the result object. The lines array will always contain an array of objects, each object representing a single line of text. This is how shotgun stays UI agnostic because the app using shotgun can iterate over this array and display each line however it chooses to. Let's write some code to handle each of these situations:
 
-        var prompt = require('prompt'),
-            shotgun = require('shotgun'),
+        var readline = require('readline'),
+            shotgun = require('../index'),
             shell = new shotgun.Shell();
 
-        function callback(err, val) {
-            var result = {},
-                exit = false;
-            if (!err && val.cmdStr) {
-                result = shell.execute(val.cmdStr);
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
 
-                if (result.clearDisplay) {
-                    for(var i = 0; i < 50; i++) {
-                        console.log('\r\n');
-                    }
-                }
-
-                exit = result.exit;
-
-                result.lines.forEach(function (line) {
-                    console[line.type](line.text);
-                });
-            }
-            if (!exit) {
-                prompt.get('cmdStr', callback);
-            }
+        function parseInput(cmdStr) {
+            var result = shell.execute(cmdStr);
+            if (result.clearDisplay)
+                for (var i = 0; i < 50; i++)
+                    console.log('\r\n');
+            result.lines.forEach(function (line) {
+                console[line.type](line.text);
+            });
+            exit = result.exit;
+            if (result.exit)
+                rl.close();
+            else
+                rl.question("> ", parseInput); // Rinse and repeat.
         }
-        prompt.get('cmdStr', callback);
 
-    In the above example we do several things. First we check if `clearDisplay` is true. If it is then we print a bunch of blank lines to the display. Next we check if `exit` is true and if it is then we skip calling the prompt module and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; `type` contains either 'log', 'warn', or 'error' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on the `console`, passing in the `text`.
+        rl.question("> ", parseInput);
+
+    In the above example we do several things with the restult. First we check if `clearDisplay` is true. If it is then we print a bunch of blank lines to the console to simulate clearing the screen. Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; `type` contains either 'log', 'warn', or 'error' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on the `console`, passing in the `text`.
 
 7. We're almost done but there is one more piece we need to include. To maintain state across executions shotgun hands back a context object. `result.context` contains information that allows shotgun to know if it was prompting the user for a value, among other things. You are welcome to examine this object in more detail, but the only thing you are required to do with it is pass it back in on each execution. To do this in our sample app we will create a `context` variable in a higher scope and update that with the value from `result`.
 
-        var prompt = require('prompt'),
-            shotgun = require('shotgun'),
+        var readline = require('readline'),
+            shotgun = require('../index'),
             shell = new shotgun.Shell(),
-            context = {};
+            context = {}; // Declare empty context object.
 
-        function callback(err, val) {
-            var result = {},
-                exit = false;
-            if (!err && val.cmdStr) {
+        var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
 
-                // execute takes the user input string, an optional 'options' object, and the 'context' object we mentioned.
-                result = shell.execute(val.cmdStr, {}, context);
-
-                context = result.context;
-
-                if (result.clearDisplay) {
-                    for(var i = 0; i < 50; i++) {
-                        console.log('\r\n');
-                    }
-                }
-
-                exit = result.exit;
-
-                result.lines.forEach(function (line) {
-                    console[line.type](line.text);
-                });
-            }
-            if (!exit) {
-                prompt.get('cmdStr', callback);
-            }
+        function parseInput(cmdStr) {
+            var result = shell.execute(cmdStr, context); // Pass in the context object.
+            context = result.context; // Overwrite context object with updated context object from shotgun.
+            if (result.clearDisplay)
+                for (var i = 0; i < 50; i++)
+                    console.log('\r\n');
+            result.lines.forEach(function (line) {
+                console[line.type](line.text);
+            });
+            exit = result.exit;
+            if (result.exit)
+                rl.close();
+            else
+                rl.question("> ", parseInput); // Rinse and repeat.
         }
-        prompt.get('cmdStr', callback);
+
+        rl.question("> ", parseInput);
 
     Now our context object is traveling in a loop as we execute commands. Every time we execute a command we save the context and pass it back in with the next execution. If you were to use shotgun in a web application you would either need to send it to the client and then have the client send it back with the next request, or you would need to store it in session.
 
