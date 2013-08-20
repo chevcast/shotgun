@@ -10,7 +10,7 @@
 
 An optional object containing various options.
 
-**cmdsDir (string)** - If specified then shotgun will use this directory to look for your command modules. Defaults to 'shotgunCmds'.
+**cmdsDir (string)** - If specified then shotgun will use this directory to look for your command modules. Defaults to 'shotgun_cmds'.
 
 **namespace (string)** - Identifies this shell instance. Particularly useful when shotgun-client is used to create browser consoles. Defaults to 'shotgun'.
 

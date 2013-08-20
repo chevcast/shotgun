@@ -6,7 +6,7 @@ var fs = require('fs'),
     CommandResponse = require('./CommandResponse'),
     defaultOptions = {
         namespace: 'shotgun',
-        cmdsDir: 'shotgunCmds',
+        cmdsDir: 'shotgun_cmds',
         defaultCmds: {
             clear: true,
             help: true,
@@ -62,7 +62,7 @@ module.exports.Shell = function (options) {
     // Load default command modules.
     for (var key in settings.defaultCmds) {
         if (settings.defaultCmds[key])
-            shell.loadCommandModule(path.resolve(__dirname, 'defaultCmds', key + '.js'));
+            shell.loadCommandModule(path.resolve(__dirname, 'default_cmds', key + '.js'));
     }
 
     // Load custom command modules.
