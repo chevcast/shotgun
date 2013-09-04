@@ -84,7 +84,7 @@ exports.invoke = function (options, shell) {
                     strs.push({ option: option, str: optionStr});
                     maxLength = optionStr.length > maxLength ? optionStr.length : maxLength;
                 }
-                
+
                 res.log('Options:');
                 res.log();
                 for (var index in strs) {
