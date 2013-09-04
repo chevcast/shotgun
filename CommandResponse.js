@@ -13,7 +13,7 @@ module.exports = exports = function (context) {
         res.lines.push({
             options: options || {},
             type: 'log',
-            text: text.toString() || ''
+            text: text ? text.toString() : ''
         });
     };
 
@@ -22,7 +22,7 @@ module.exports = exports = function (context) {
         res.lines.push({
             options: options || {},
             type: 'error',
-            text: text.toString() || ''
+            text: text ? text.toString() : ''
         });
     };
 
@@ -31,7 +31,7 @@ module.exports = exports = function (context) {
         res.lines.push({
             options: options || {},
             type: 'warn',
-            text: text.toString() || ''
+            text: text ? text.toString() : ''
         });
     };
 
@@ -40,7 +40,7 @@ module.exports = exports = function (context) {
         res.lines.push({
             options: options || {},
             type: 'debug',
-            text: text.toString() || ''
+            text: text ? text.toString() : ''
         });
     };
 
