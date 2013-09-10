@@ -211,7 +211,7 @@ Any options specified in the user input will be passed to the `invoke()` functio
         required: true,
         default: 1,
         description: 'The number of times to display the message.',
-        validate: function (value) {
+        validate: function (value, options) {
             return value > 0;
         }
     }
@@ -279,6 +279,50 @@ Defining options with a default value ensures that the option will have a value 
 
 You don't have to supply a description, but if you do then it will show up when the user attempts to get help information for the command by typing `help commandName`.
 
+#### hidden
+
+    exports.options = {
+        message: {
+            hidden: true
+        }
+    };
+
+Supplying `hidden: true` will cause the default "help" command to hide this option when showing available options for the command. This is useful if you have set `noName: true` since you will likely include unnamed command options in the command's usage string.
+
+ Example:
+
+    // login.js
+    var db = require('./db');
+    exports.description = "Allows the user to sign in with their username and password.";
+    exports.usage = "[username] [password]";
+    exports.options = {
+        username: {
+            noName: true,
+            required: true,
+            prompt: "Please enter your username.",
+            validate: function (username) {
+                return db.checkUserExists(username);
+            },
+            hidden: true
+        },
+        password: {
+            noName: true,
+            required: true,
+            prompt: "Please enter your password.",
+            validate: function (password, options) {
+                var user = db.getUser(options.username);
+                return user.password === password;
+            },
+            hidden: true,
+            password: true
+        }
+    };
+    exports.invoke = function (options, shell) {
+        // Do authentication stuff.
+    };
+
+In the above module there is no reason to display "--username" or "--password" in the help menu because users will almost never explicitly supply them. They will either include them with no names or be prompted for them.
+
 #### noName
 
     exports.options = {
@@ -321,13 +365,23 @@ This is one of the simpler options. If you set `required: true` on an option the
 
 #### validate
 
+    // Regular expression.
     exports.options = {
         message: {
-            validate: // Regular expression or function that accepts a value and returns true or false.
+            validate: /^[a-z0-9]$/i // Only alpha-numeric characters are allowed.
         }
     };
 
-Validate allows you to specify a regular expression or a function that will inform shotgun that the supplied value should be validated. If the value does not pass validation then an error will be displayed to the user and they will have to supply valid input before the command will be invoked.
+    // Validation Function
+    exports.options = {
+        message: {
+            validate: function (msg, options) {
+                return msg === 'Hello world!';
+            }
+        }
+    };
+
+Validate allows you to specify a regular expression or a function that will inform shotgun that the supplied value should be validated. If the value does not pass validation then an error will be displayed to the user and they will have to supply valid input before the command will be invoked. If you use a validation function it accepts two parameters. The first is the value of the property that you want to validate. The second is all of the supplied options the user passed in. (NOTE: Keep in mind that command options are validated in order. If you access `options` in your validation function any options that appear after the one you're currently validating then those options will not have been validated yet.
 
 ### Our example 'echo' command
 

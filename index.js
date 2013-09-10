@@ -143,10 +143,6 @@ module.exports.Shell = function (options) {
 
     function validateOptions (res, options, cmd) {
 
-        // By default it is OK to invoke the command. This can be set false at any point if options do not pass
-        // validation.
-        var okToInvoke = true;
-
         // If the command has pre-defined options then parse through them and validate against the supplied options.
         if (cmd.options) {
 
@@ -207,8 +203,8 @@ module.exports.Shell = function (options) {
                     if (definedOption.validate instanceof RegExp) {
                         // If value does not pass validation then do not invoke command and write error message.
                         if (!definedOption.validate.test(options[key])) {
-                            okToInvoke = false;
                             res.error('invalid value for "' + key + '"');
+                            return false;
                         }
                     }
                     // If defined validation is a function then pass the value to it.
@@ -216,29 +212,32 @@ module.exports.Shell = function (options) {
                         try {
                             // If the validation function returns false then do not invoke the command and write
                             // error message.
-                            if (!definedOption.validate(options[key])) {
-                                okToInvoke = false;
-                                res.error('invalid value for "' + key + '"');
+                            var validationResult = definedOption.validate(options[key], options);
+                            if (validationResult !== true) {
+                                if (typeof(validationResult) !== 'string')
+                                    res.error('invalid value for "' + key + '"');
+                                else
+                                    res.error(validationResult);
+                                return false;
                             }
                         }
                         // If the provided validation function throws an error at any point then handle it
                         // gracefully and simply fail validation.
                         catch (ex) {
-                            okToInvoke = false;
                             res.error('invalid value for "' + key + '"');
+                            return false;
                         }
                     }
                 }
 
                 // If option is required but is not found in supplied options then error.
                 if (definedOption.required && !(key in options)) {
-                    okToInvoke = false;
                     res.error('missing parameter "' + key + '"');
+                    return false;
                 }
             }
         }
-
-        // If all options passed validation then okToInvoke will be true.
-        return okToInvoke;
+        // If we made it this far then all options are valid so return true.
+        return true;
     }
 };

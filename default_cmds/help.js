@@ -63,9 +63,7 @@ exports.invoke = function (options, shell) {
 
             // If a "usage key" is specified then display it.
             if (cmd.usage) {
-                res.log('Usage:');
-                res.log();
-                res.log(options.command + ' ' + cmd.usage);
+                res.log('Usage: "' + options.command + ' ' + cmd.usage + '"');
                 res.log();
             }
 
@@ -74,30 +72,33 @@ exports.invoke = function (options, shell) {
                 var strs = [],
                     maxLength = 0;
                 for (var key in cmd.options) {
-                    var option = cmd.options[key],
-                        optionStr = (key.length > 1 ? '--' : '-') + key;
-                    if (option.aliases) {
-                        option.aliases.forEach(function (alias) {
-                            optionStr += ',' + (alias.length > 1 ? '--' : '-') + alias;
-                        });
+                    var option = cmd.options[key];
+                    if (!option.hidden) {
+                        var optionStr = (key.length > 1 ? '--' : '-') + key;
+                        if (option.aliases) {
+                            option.aliases.forEach(function (alias) {
+                                optionStr += ',' + (alias.length > 1 ? '--' : '-') + alias;
+                            });
+                        }
+                        strs.push({ option: option, str: optionStr});
+                        maxLength = optionStr.length > maxLength ? optionStr.length : maxLength;
                     }
-                    strs.push({ option: option, str: optionStr});
-                    maxLength = optionStr.length > maxLength ? optionStr.length : maxLength;
                 }
-
-                res.log('Options:');
-                res.log();
-                for (var index in strs) {
-                    var option = strs[index].option,
-                        optionStr = strs[index].str;
-                    if (option.description) {
-                        optionStr += new Array((maxLength - optionStr.length) + 5).join(' ');
-                        optionStr += option.description;
+                if (strs.length > 0) {
+                    res.log('Options:');
+                    res.log();
+                    for (var index in strs) {
+                        var option = strs[index].option,
+                            optionStr = strs[index].str;
+                        if (option.description) {
+                            optionStr += new Array((maxLength - optionStr.length) + 5).join(' ');
+                            optionStr += option.description;
+                        }
+                        res.log(optionStr, { dontType: true });
                     }
-                    res.log(optionStr, { dontType: true });
+                    res.log();
                 }
             }
         }
     }
-    res.log();
 };
