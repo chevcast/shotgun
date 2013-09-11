@@ -110,7 +110,7 @@ describe('Shotgun', function () {
             should.exist(result);
             result = shell.execute('help', result.context);
             should.exist(result);
-            result.should.have.property('lines').with.length(7);
+            result.should.have.property('lines').with.length(8);
         });
 
         it('should send values to context command if input does not match real command.', function () {
