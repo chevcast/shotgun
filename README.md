@@ -39,16 +39,17 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
         rl.on('line', function (cmdStr) {
             console.log("Echo: %s", cmdStr);
             rl.prompt();
-        });
+        }).on('close', process.exit);
 
         rl.prompt();
 
-    So far we haven't done anything with shotgun. We've just put together a small app the continually asks the user for input and then prints that input to the console.
+    So far we haven't done anything with shotgun. We've just put together a small app that continually asks the user for input and then prints that input to the console.
 
-    > test
-    Echo: test
+    > > test
+    > Echo: test
 
 3. Once you have a proper prompt application setup go ahead and install shotgun.
+
     > npm install shotgun
 
 4. Require shotgun and instantiate a shell.
@@ -72,7 +73,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
         rl.on('line', function (cmdStr) {
             var result = shell.execute(cmdStr);
             rl.prompt();
-        });
+        }).on('close', process.exit);
 
         rl.prompt();
 
@@ -94,7 +95,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
                 console[line.type](line.text);
             });
             result.exit ? rl.close() : rl.prompt();
-        });
+        }).on('close', process.exit);
 
         rl.prompt();
 
@@ -120,7 +121,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
                 console[line.type](line.text);
             });
             result.exit ? rl.close() : rl.prompt();
-        });
+        }).on('close', process.exit);
 
         rl.prompt();
 
