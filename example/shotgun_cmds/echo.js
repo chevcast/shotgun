@@ -6,7 +6,8 @@ exports.options = {
     message: {
         noName: true,
         required: true,
-        description: 'The message to be displayed.'
+        description: 'The message to be displayed.',
+        hidden: true
     },
     iterations: {
         aliases: ['i'],

@@ -99,7 +99,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
 
         rl.prompt();
 
-    In the above example we do several things with the restult. First we check if `clearDisplay` is true. If it is then we clear the console display using [ASCII control sequences](http://ascii-table.com/ansi-escape-sequences-vt-100.php). Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; `type` contains either 'log', 'warn', or 'error' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on the `console`, passing in the `text`.
+    In the above example we do several things with the restult. First we check if `clearDisplay` is true. If it is then we clear the console display using [ASCII control sequences](http://ascii-table.com/ansi-escape-sequences-vt-100.php). Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; by default `type` contains either 'log', 'warn', 'error', or 'debug' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on `console`, passing in the line `text` to be displayed.
 
 7. We're almost done but there is one more piece we need to include. To maintain state across executions shotgun hands back a context object. `result.context` contains information that allows shotgun to know if it was prompting the user for a value, among other things. You are welcome to examine this object in more detail, but the only thing you are required to do with it is pass it back in on each execution. To do this in our sample app we will create a `context` variable in a higher scope and update that with the value from `result`.
 
@@ -154,11 +154,12 @@ In the body of the `invoke` function you also have access to a *result API* via 
 
 The result object's helper functions are as follows:
 
-`log` - Adds a line of text to the `lines` array on the result object.
-`warn` - Same as `log` except it changes the line's `type` property to "warn".
-`error` - Same as `warn` except `type` is set to "error".
+- `log` - Adds a line of text to the `lines` array on the result object.
+- `warn` - Same as `log` except it changes the line's `type` property to "warn".
+- `error` - Same as `warn` except `type` is set to "error".
+- 'debug' - Same as others except `type` is set to "debug".
 
-`warn` and `error` are useful for giving context to lines of text so that the UI can apply different styling behaviors when displaying the text to the user. For example your command might do something like `this.warn('The value supplied is below the minimum threshold.');` within the `invoke` function. This adds a line object to the `lines` array on the result object that will be passed to the application using shotgun. When the application iterates over the `lines` array it will see that the line has a property called `type` that is set to "error" and it will know to display the text differently from the normal `log` type.
+`warn`, `error`, and `debug` are useful for giving context to lines of text so that the UI can apply different styling behaviors when displaying the text to the user. For example your command might do something like `this.warn('The value supplied is below the minimum threshold.');` within the `invoke` function. This adds a line object to the `lines` array on the result object that will be passed to the application using shotgun. When the application iterates over the `lines` array it will see that the line has a property called `type` that is set to "error" and it will know to display the text differently from the normal `log` type.
 
 There are two other helper functions available known as `setContext` and `resetContext` but we'll go into more detail with those later in this README.
 
@@ -213,7 +214,7 @@ Using the sample 'echo' command we defined earlier the above sample user input w
 
     exports.invoke = function (options, shell) {
         options.iterations == 5; // true
-        options.message == "Dance monkey, dance!"; // true
+        options.message === "Dance monkey, dance!"; // true
     };
 
 Since the `message` option has `noName` set to true shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has `noName` enabled.
@@ -230,7 +231,7 @@ would yield:
         options.verbose == true; // true
     };
 
-Despite `verbose` not being defined as part of the `options` property, it is still accessible if provided by the user. It will just be optional and won't undergo any validation.
+Despite `verbose` not being defined as part of the `options` property of the command module, it is still accessible if provided by the user. It will just be optional, won't undergo any validation, and won't show up in that command modules help information.
 
 ### Defined Command Options
 
@@ -372,7 +373,7 @@ Validate allows you to specify a regular expression or a function that will info
 
 ### Our example 'echo' command
 
-What we did in a previous example is create a simple command called 'echo' that will be plugged into the shotgun shell framework simply by placing the module in the 'cmds' directory (or the directory you passed into the shell).
+What we did in a previous example is create a simple command called 'echo' that will be plugged into the shotgun shell framework simply by placing the module in the 'shotgun_cmds' directory (or the directory you passed into the shell).
 
 The example command we just wrote is a pretty simple command. It performs a small task and only accepts one option. The nice thing about shotgun is that you don't have to do any pre-parsing of user input before passing it along to the module. Shotgun does all the legwork for you, allowing you to focus on creating well-designed command modules instead of worrying about user input, context, etc.
 
@@ -413,7 +414,7 @@ This would yield:
         ]
     }
 
-The lines are contained in an array. Each line object contains the text that will be displayed for that line and an `options` object containing meta information about the line such as bold, italic, underline, etc. charByChar is true by default; it tells the UI that if it can it should print out the line character by character to give it that movie-style terminal feel. The UI can then apply whatever display options it is capable of providing, but the options can be safely ignored if necessary. For example, if you were writing a console application then bold, italics, and underline wouldn't be possible. The options are just metadata that does not have to be used.
+The lines are contained in an array. Each line object contains the text that will be displayed for that line and an `options` object containing meta information about the line such as bold, italic, underline, etc. You can see that `charByChar` is true by default without you setting it; this tells the UI that if it can it should print out the line character by character to give it that movie-style terminal feel. The UI can then apply whatever display options it is capable of providing, but the options can be safely ignored if necessary. For example, if you were writing a console application then bold, italics, and underline wouldn't be possible. The options are just metadata that does not have to be used. We include `charByChar: true` by default for a couple reasons. First, many people want every line of text to be displayed character by character but they don't want to have to set a line property every single time they use `log()`. Second, [shotgun-client](https://npmjs.org/package/shotgun-client) includes character by character typing by default and uses this line option. So by default it is true and you are able to set it to false where necessary, such as when displaying HTML markup (which breaks if JavaScript tries to print out HTML tags character by character into the browser). If you don't want it true by default then simply ignore the line option in your UI; it is not required.
 
 ### The 'help' command
 
@@ -455,15 +456,25 @@ This would yield:
 
 ### The `invoke` function and the result object.
 
-The `shell.execute()` function always returns a result object. You may have noticed in our example command above that this object gets passed into the `help` and `invoke` functions. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as shotgun will add context information to it for you; if you overwrite this object you will lose this information.
+The `shell.execute()` function always returns a result object. You are able to access this result object from within your command module's `invoke` function via the `this` keyword; it is often a good idea to assign `this` to a variable in order to maintain reference to it. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as shotgun will add context information to it for you; if you overwrite this object you will lose this information and your app may exhibit unexpected behavior.
 
-The result object contains helper functions. While you could manually push an object to the lines array on the result object, it is far more convenient to use the provided helper functions. Below is an example of using the `log()` function.
+The result object contains helper functions. While you could manually push an object to the lines array on the result object:
+
+    exports.invoke = function (options, shell) {
+        this.lines.push({
+            options: { charByChar: true },
+            type: 'log',
+            text: 'This is an example of manually adding a line of text to the lines array.'
+        });
+    };
+
+It is far more convenient to use the provided helper functions:
 
     exports.invoke = function (options, shell) {
         this.log('This is an example of using the log() function.');
     };
 
-Some functions, such as `log()` take an options object if needed. In the case of `log()` this object is added to each line object in the lines array.
+The text helper functions such as `log()`, `warn()`, `error()`, and `debug()`, accept an options object as a second argument if needed. This options object is added to the line object before the line object is added to the lines array.
 
     exports.invoke = function (options, shell) {
         this.log('If possible, the UI should display this line bolded, italicized, and underlined.', {
@@ -473,17 +484,17 @@ Some functions, such as `log()` take an options object if needed. In the case of
         });
     };
 
-There are standard properties that shotgun always adds to the result object such as `context`, `lines`, `clearDisplay`, and `exit`. You can change these options when necessary, but you are also welcome to add your own values.
+There are standard properties that shotgun adds to the result object such as `context`, `lines`, `clearDisplay`, and `exit`. You can change these options when necessary, but you are also welcome to add your own values.
 
     // cmds/mycommand.js
 
     exports.invoke = function (options, shell) {
-        this.customMessage = 'This is a custom message.';
+        this.customValue = 'This is a custom value.';
     };
 
     // app.js
 
-    console.log(shell.execute('mycommand').customMessage);
+    console.log(shell.execute('mycommand').customValue);
 
 `shell.execute` also takes an options object in case you need to make values available to a command without them needing to be supplied as user input.
 
@@ -508,7 +519,7 @@ will yield:
     // cmds/mycommand.js
 
     exports.invoke = function (options, shell) {
-        options.someValue; // 'bacon'
+        options.someValue === 'bacon'; // true
     };
 
 ### Setting a helpful command context.
@@ -520,11 +531,11 @@ Command contexts are extremely helpful and save the user a lot of keystrokes. Ba
 > $ topic 123 -r  
 > Please enter your reply.
 
-The user is forced to type the entire 'topic 123' command over again just so he/she can supply the '-r' flag. With command contexts your topic command can simply do this:
+The user is forced to type the entire 'topic 123' command over again just so he/she can supply the '-r' flag. With command contexts you can simply call this helper function from inside your command module:
 
     this.setContext('topic 123');
 
-This simple helper will setup a command context. Now all the user's input will be appended to that context. The new user experience will be something like this:
+This simple helper will setup a command context for 'topic 123'. Now all the user's input will be appended to that context. The new user experience will be something like this:
 
 > $ topic 123  
 > [displays topic content]  
@@ -536,10 +547,12 @@ The full command is expanded out to 'topic 123 -r' because shotgun knows that 't
 > $ topic 123  
 > [displays topic content]  
 > $ help topic  
-> [displays help for the topic command]  
+> [displays help for the topic command]
 > $ -r  
 > Please enter your reply.
 
-Notice how the user was able to run the 'help' command after the 'topic 123' context was set. When the 'help' command finished the user was still able to supply just the '-r' because the context was still active. The default 'clear' command resets the active context but if you do need to clear the active context anywhere else in your command modules then you can run the following helper:
+Notice how the user was able to run the 'help' command after the 'topic 123' context was set. When the 'help' command finished the user was still able to supply just the '-r' because the context was still active. The default 'clear' command resets the active context but if you need to clear the active context manually anywhere else in your command modules then you can run the following helper function:
 
     this.resetContext();
+
+I usually use this helper if I'm clearing the display from another command. The included 'clear' command module already does this, but sometimes other command modules I write will also clear the screen. For example, I wrote an 'about.js' command module that displays several paragraphs of text. I don't want to simply append all that text to whatever else is already in the user's current display so I made my 'about' command set `this.clearDisplay = true;`. Now let's say that the user had executed 'topic 123' and is currently viewing the topic body. Now say the user decides to execute the 'about' command. The command clears the display so the topic body is no longer visible. From the user's perspective it wouldn't make sense at this point for '-r' to allow the user to reply to topic 123. There may be exceptions, but anytime the display is cleared it makes sense to also reset any command contexts.
