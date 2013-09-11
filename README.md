@@ -32,17 +32,16 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
 
         var readline = require('readline');
 
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
+        // Create interface that reads from console and outputs to console.
+        var rl = readline.createInterface(process.stdin, process.stdout);
+        rl.setPrompt("> ");
+
+        rl.on('line', function (cmdStr) {
+            console.log("Echo: %s", cmdStr);
+            rl.prompt();
         });
 
-        function parseInput(cmdStr) {
-            console.log("Echo: %s", cmdStr);
-            rl.question("> ", parseInput); // Rinse and repeat.
-        }
-
-        rl.question("> ", parseInput);
+        rl.prompt();
 
     So far we haven't done anything with shotgun. We've just put together a small app the continually asks the user for input and then prints that input to the console.
 
@@ -66,17 +65,16 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
             shotgun = require('../index'),
             shell = new shotgun.Shell();
 
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
+        // Create interface that reads from console and outputs to console.
+        var rl = readline.createInterface(process.stdin, process.stdout);
+        rl.setPrompt("> ");
+
+        rl.on('line', function (cmdStr) {
+            var result = shell.execute(cmdStr);
+            rl.prompt();
         });
 
-        function parseInput(cmdStr) {
-            var result = shell.execute(cmdStr);
-            rl.question("> ", parseInput); // Rinse and repeat.
-        }
-
-        rl.question("> ", parseInput);
+        rl.prompt();
 
 6. So far all we've done is pass the user's input on to shotgun and get back a `result` object, but we're not yet using it for anything. The `result` object returned from shotgun acts as a set of instructions. Depending on the command modules installed the result object could contain a wide variety of properties for you to consume in your application. There are a few default commands that come with shotgun: clear, exit, and help. 'clear' sets a property on the result called `clearDisplay`. 'exit' sets a property on the result called `exit`. 'help' writes a bunch of objects to a `lines` array on the result object. The lines array will always contain an array of objects, each object representing a single line of text. This is how shotgun stays UI agnostic because the app using shotgun can iterate over this array and display each line however it chooses to. Let's write some code to handle each of these situations:
 
@@ -84,27 +82,21 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
             shotgun = require('../index'),
             shell = new shotgun.Shell();
 
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+        // Create interface that reads from console and outputs to console.
+        var rl = readline.createInterface(process.stdin, process.stdout);
+        rl.setPrompt("> ");
 
-        function parseInput(cmdStr) {
+        rl.on('line', function (cmdStr) {
             var result = shell.execute(cmdStr);
             if (result.clearDisplay)
-                for (var i = 0; i < 50; i++)
-                    console.log('\r\n');
+                console.log('\u001B[2J\u001B[0;0f');
             result.lines.forEach(function (line) {
                 console[line.type](line.text);
             });
-            exit = result.exit;
-            if (result.exit)
-                rl.close();
-            else
-                rl.question("> ", parseInput); // Rinse and repeat.
-        }
+            result.exit ? rl.close() : rl.prompt();
+        });
 
-        rl.question("> ", parseInput);
+        rl.prompt();
 
     In the above example we do several things with the restult. First we check if `clearDisplay` is true. If it is then we print a bunch of blank lines to the console to simulate clearing the screen. Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; `type` contains either 'log', 'warn', or 'error' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on the `console`, passing in the `text`.
 
@@ -115,28 +107,22 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
             shell = new shotgun.Shell(),
             context = {}; // Declare empty context object.
 
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+        // Create interface that reads from console and outputs to console.
+        var rl = readline.createInterface(process.stdin, process.stdout);
+        rl.setPrompt("> ");
 
-        function parseInput(cmdStr) {
+        rl.on('line', function (cmdStr) {
             var result = shell.execute(cmdStr, context); // Pass in the context object.
             context = result.context; // Overwrite context object with updated context object from shotgun.
             if (result.clearDisplay)
-                for (var i = 0; i < 50; i++)
-                    console.log('\r\n');
+                console.log('\u001B[2J\u001B[0;0f');
             result.lines.forEach(function (line) {
                 console[line.type](line.text);
             });
-            exit = result.exit;
-            if (result.exit)
-                rl.close();
-            else
-                rl.question("> ", parseInput); // Rinse and repeat.
-        }
+            result.exit ? rl.close() : rl.prompt();
+        });
 
-        rl.question("> ", parseInput);
+        rl.prompt();
 
     Now our context object is traveling in a loop as we execute commands. Every time we execute a command we save the context and pass it back in with the next execution. If you were to use shotgun in a web application you would either need to send it to the client and then have the client send it back with the next request, or you would need to store it in session.
 

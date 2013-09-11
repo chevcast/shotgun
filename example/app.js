@@ -3,25 +3,18 @@ var readline = require('readline'),
     shell = new shotgun.Shell(),
     context = {};
 
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+var rl = readline.createInterface(process.stdin, process.stdout);
+rl.setPrompt("> ");
 
-function parseInput(cmdStr) {
+rl.on('line', function (cmdStr) {
     var result = shell.execute(cmdStr, context);
     context = result.context;
     if (result.clearDisplay)
-        for (var i = 0; i < 50; i++)
-            console.log('\r\n');
+        console.log('\u001B[2J\u001B[0;0f');
     result.lines.forEach(function (line) {
         console[line.type](line.text);
     });
-    exit = result.exit;
-    if (result.exit)
-        rl.close();
-    else
-        rl.question("> ", parseInput);
-}
+    result.exit ? rl.close() : rl.prompt();
+});
 
-rl.question("> ", parseInput);
+rl.prompt();

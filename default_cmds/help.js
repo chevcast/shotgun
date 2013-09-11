@@ -47,6 +47,7 @@ exports.invoke = function (options, shell) {
             if (!cmd.hidden)
                 res.log(helpStr, { dontType: cmdNames.length > 5 });
         }
+        res.log();
     }
     // If a command was passed in as an argument to the help command then display more specific help information for the specified command.
     else {
