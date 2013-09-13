@@ -15,7 +15,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (options, shell, done) {
     var res = this;
     if (!options.reply) {
         res.log('[topic ' + options.id + ' content]');
@@ -24,4 +24,5 @@ exports.invoke = function (options, shell) {
     else {
         res.log('Your reply was: ' + options.reply);
     }
+    done();
 };

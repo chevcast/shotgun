@@ -9,7 +9,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (options, shell, done) {
     var res = this,
         cmdNames = [];
 
@@ -102,4 +102,5 @@ exports.invoke = function (options, shell) {
             }
         }
     }
+    done();
 };

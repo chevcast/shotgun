@@ -29,6 +29,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (options, shell, done) {
     this.log('Welcome back ' + options.username + '!');
+    done();
 };
