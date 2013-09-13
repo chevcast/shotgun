@@ -22,7 +22,7 @@ exports.invoke = function (options, shell, done) {
         res.setContext('topic ' + options.id);
     }
     else {
-        res.log('Your reply was: ' + options.reply);
+        res.log('Your reply was: ' + options.reply.replace(/\n/g, ""));
     }
     done();
 };

@@ -9,6 +9,8 @@ rl.setPrompt("> ");
 rl.on('line', function (cmdStr) {
     shell.execute(cmdStr, context, function (result) {
         context = result.context;
+        if (context.passive) rl.setPrompt(context.passive.msg + " > ");
+        else rl.setPrompt("> ");
         if (result.clearDisplay)
             console.log('\u001B[2J\u001B[0;0f');
         result.lines.forEach(function (line) {

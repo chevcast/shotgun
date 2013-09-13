@@ -85,16 +85,16 @@ describe('Shotgun', function () {
                 should.exist(result);
                 result.should.have.property('lines').with.length(1);
                 result.lines[0].should.have.property('type', 'log');
-                result.lines[0].should.have.property('text', 'Enter value for username.');
+                result.lines[0].should.have.property('text', 'Please enter your username.');
                 shell.execute('charlie', result.context, function (result) {
                     should.exist(result);
                     result.should.have.property('lines').with.length(1);
                     result.lines[0].should.have.property('type', 'log');
-                    result.lines[0].should.have.property('text', 'Enter value for password.');
+                    result.lines[0].should.have.property('text', 'Please enter your password.');
                     shell.execute('password123', result.context, function (result) {
                         result.should.have.property('lines').with.length(1);
                         result.lines[0].should.have.property('type', 'log');
-                        result.lines[0].should.have.property('text', 'Success!');
+                        result.lines[0].should.have.property('text', 'Welcome back charlie!');
                         done();
                     });
                 });
@@ -106,7 +106,7 @@ describe('Shotgun', function () {
                 should.exist(result);
                 result.should.have.property('lines').with.length(1);
                 result.lines[0].should.have.property('type', 'log');
-                result.lines[0].should.have.property('text', 'Success!');
+                result.lines[0].should.have.property('text', 'Welcome back charlie!');
                 done();
             });
         });
@@ -115,6 +115,7 @@ describe('Shotgun', function () {
             shell.execute('login charlie', function (result) {
                 should.exist(result);
                 result.should.have.property('password', true);
+                done();
             });
         });
 
@@ -126,6 +127,7 @@ describe('Shotgun', function () {
             shell.execute('topic 123', function (result) {
                 should.exist(result);
                 result.should.have.property('context').with.property('passive').with.property('cmdStr', 'topic 123');
+                done();
             });
         });
 

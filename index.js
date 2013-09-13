@@ -89,6 +89,7 @@ module.exports.Shell = function (options) {
     // options - properties on the options object will override user-provided arguments.
     // context - this object is used to maintain state across multiple executions. Pass in res.context.
     shell.execute = function (cmdStr) {
+
         var callback, context = {}, options = {};
         switch (arguments.length) {
             case 2:
@@ -113,8 +114,10 @@ module.exports.Shell = function (options) {
         extend(res, shell.helpers);
 
         // If no command string was supplied then write an error message.
-        if (!cmdStr)
+        if (!cmdStr || /^\s*$/.test(cmdStr)) {
             res.error('You must supply a value.');
+            return callback(res);
+        }
 
         // Parse the command string into an argument array and set the command name to the first item.
         var args = cmdStr,
@@ -145,19 +148,14 @@ module.exports.Shell = function (options) {
             if (cmd) {
                 if (validateOptions(res, options, cmd)) {
                     var done = callback.bind({}, res);
-                    cmd.invoke.call(res, options, shell, done);
-                    // Return because we don't want to call the callback yet.
-                    return;
+                    return cmd.invoke.call(res, options, shell, done);
                 }
             }
             /// ...otherwise check to see if a passive context exists.
             else {
                 // If a passive context exists then rerun 'execute' passing in the command string stored in the context...
-                if (context.passive){
-                    res = shell.execute(context.passive.cmdStr + ' ' + cmdStr, context, callback);
-                    // Return because we don't want to call the callback yet.
-                    return;
-                }
+                if (context.passive)
+                    return shell.execute(context.passive.cmdStr + ' ' + cmdStr, context, callback);
                 // ...otherwise it must be an invalid command.
                 else
                     res.error('"' + cmdName + '" is not a valid command.');
