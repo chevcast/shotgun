@@ -3,7 +3,7 @@ var fs = require('fs'),
     optimist = require('optimist'),
     shellQuote = require('shell-quote'),
     extend = require('extend'),
-    CommandResponse = require('./CommandResponse'),
+    CommandResult = require('./CommandResult'),
     validateOptions = require('./validateOptions'),
     defaultOptions = {
         namespace: 'shotgun',
@@ -110,7 +110,7 @@ module.exports.Shell = function (options) {
         if (!context) context = {};
 
         // Define our response object. This is the object we will return.
-        var res = new CommandResponse(context);
+        var res = new CommandResult(context);
         extend(res, shell.helpers);
 
         // If no command string was supplied then write an error message.
