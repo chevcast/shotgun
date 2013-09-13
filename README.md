@@ -4,6 +4,8 @@
 [![Dependencies Status](https://gemnasium.com/Chevex/shotgun.png)](https://gemnasium.com/Chevex/shotgun)
 [![NPM version](https://badge.fury.io/js/shotgun.png)](http://badge.fury.io/js/shotgun)
 
+> NOTE: Shotgun 3.0.0 and higher now uses a new asynchronous model allowing you to do asynchronous work within your command modules. This document has been updated to reflect the changes to the API. Version 3.0.0 and higher is no longer compatible with previous versions. If you use shotgun-client for web-based shell functionality then please update to shotgun-client v3.1.0 or higher.
+
 > Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it, including web applications. In fact, I took the liberty of writing a separate module called [shotgun-client](https://npmjs.org/package/shotgun-client) that makes it simple to integrate shotgun with any web application.
 
 ---
@@ -71,13 +73,14 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
         rl.setPrompt("> ");
 
         rl.on('line', function (cmdStr) {
-            var result = shell.execute(cmdStr);
-            rl.prompt();
+            shell.execute(cmdStr, function (result) {
+                rl.prompt();
+            });
         }).on('close', process.exit);
 
         rl.prompt();
 
-6. So far all we've done is pass the user's input on to shotgun and get back a `result` object, but we're not yet using it for anything. The `result` object returned from shotgun acts as a set of instructions. Depending on the command modules installed the result object could contain a wide variety of properties for you to consume in your application. There are a few default commands that come with shotgun: clear, exit, and help. 'clear' sets a property on the result called `clearDisplay`. 'exit' sets a property on the result called `exit`. 'help' writes a bunch of objects to a `lines` array on the result object. The lines array will always contain an array of objects, each object representing a single line of text. This is how shotgun stays UI agnostic because the app using shotgun can iterate over this array and display each line however it chooses to. Let's write some code to handle each of these situations:
+6. So far all we've done is pass the user's input on to shotgun along with a callback function that receives a `result` object, but we're not yet using it for anything. The `result` object passed to the callback from shotgun acts as a set of instructions. Depending on the command modules installed the result object could contain a wide variety of properties for you to consume in your application. There are a few default commands that come with shotgun: clear, exit, and help. 'clear' sets a property on the result called `clearDisplay`. 'exit' sets a property on the result called `exit`. 'help' writes a bunch of objects to a `lines` array on the result object. The lines array will always contain an array of objects, each object representing a single line of text. This is how shotgun stays UI agnostic because the app using shotgun can iterate over this array and display each line however it chooses to. Let's write some code to handle each of these situations:
 
         var readline = require('readline'),
             shotgun = require('../index'),
@@ -88,18 +91,19 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
         rl.setPrompt("> ");
 
         rl.on('line', function (cmdStr) {
-            var result = shell.execute(cmdStr);
-            if (result.clearDisplay)
-                console.log('\u001B[2J\u001B[0;0f');
-            result.lines.forEach(function (line) {
-                console[line.type](line.text);
+            shell.execute(cmdStr, function (result) {
+                if (result.clearDisplay)
+                    console.log('\u001B[2J\u001B[0;0f');
+                result.lines.forEach(function (line) {
+                    console[line.type](line.text);
+                });
+                result.exit ? rl.close() : rl.prompt();
             });
-            result.exit ? rl.close() : rl.prompt();
         }).on('close', process.exit);
 
         rl.prompt();
 
-    In the above example we do several things with the restult. First we check if `clearDisplay` is true. If it is then we clear the console display using [ASCII control sequences](http://ascii-table.com/ansi-escape-sequences-vt-100.php). Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; by default `type` contains either 'log', 'warn', 'error', or 'debug' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on `console`, passing in the line `text` to be displayed.
+    In the above example we do several things with the result. First we check if `clearDisplay` is true. If it is then we clear the console display using [ASCII control sequences](http://ascii-table.com/ansi-escape-sequences-vt-100.php). Next we check if `exit` is true and if it is then we skip asking the user for input again and let the application exit. Lastly we iterate over the `lines` array. Each line object has a `type` property and a `text` property. Obviously `text` contains the text for that line; by default `type` contains either 'log', 'warn', 'error', or 'debug' as it's value. You can do whatever you choose with that value but in this example I decided to map that to the functions with the same name on `console`, passing in the line `text` to be displayed.
 
 7. We're almost done but there is one more piece we need to include. To maintain state across executions shotgun hands back a context object. `result.context` contains information that allows shotgun to know if it was prompting the user for a value, among other things. You are welcome to examine this object in more detail, but the only thing you are required to do with it is pass it back in on each execution. To do this in our sample app we will create a `context` variable in a higher scope and update that with the value from `result`.
 
@@ -113,14 +117,16 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
         rl.setPrompt("> ");
 
         rl.on('line', function (cmdStr) {
-            var result = shell.execute(cmdStr, context); // Pass in the context object.
-            context = result.context; // Overwrite context object with updated context object from shotgun.
-            if (result.clearDisplay)
-                console.log('\u001B[2J\u001B[0;0f');
-            result.lines.forEach(function (line) {
-                console[line.type](line.text);
+            // Pass in the context object.
+            var result = shell.execute(cmdStr, context, function (result) {
+                context = result.context; // Overwrite context object with updated context object from shotgun.
+                if (result.clearDisplay)
+                    console.log('\u001B[2J\u001B[0;0f');
+                result.lines.forEach(function (line) {
+                    console[line.type](line.text);
+                });
+                result.exit ? rl.close() : rl.prompt();
             });
-            result.exit ? rl.close() : rl.prompt();
         }).on('close', process.exit);
 
         rl.prompt();
@@ -138,7 +144,7 @@ Shotgun command modules are just Node modules. There isn't anything special abou
     // cmds/echo.js
 
     // The invoke function is where the command logic will go.
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         var res = this;
         var iterations = options.iterations;
         for (var count = 0; count < iterations; count++) {
@@ -146,9 +152,9 @@ Shotgun command modules are just Node modules. There isn't anything special abou
         }
     };
 
-Within the `invoke` function two parameters are passed in for you to use. The first is `options` which simply stores all the user-supplied options when invoking your command. The second option is the instance of the shotgun `shell`. The shell allows you to access other command modules via the `cmds` collection.
+Within the `invoke` function three arguments are passed in for you to use. The first is `options` which simply stores all the user-supplied options when invoking your command. The second argument is the instance of the shotgun `shell`. The shell allows you to access other command modules via the `cmds` collection. The third argument is the `done` callback function. This callback function is new as of shotgun v3.0 and is a major improvement. You can now do asynchronous work in your command modules and then invoke the done callback to let shotgun know that you your work is finished.
 
-In the body of the `invoke` function you also have access to a *result API* via the `this` keyword. As in the above example you may want to assign `this` to a variable in case you define your own functions within `invoke` where `this` would refer to a different scope. Within `invoke` the `this` keyword refers to a result object with some helper functions defined for you.
+In the body of the `invoke` function you also have access to the *result API* via the `this` keyword. As in the above example you may want to assign `this` to a variable in case you define your own functions within `invoke` where `this` would refer to a different scope. Within `invoke` the `this` keyword refers to a result object with some helper functions defined for you.
 
 ### Helper Functions
 
@@ -212,9 +218,10 @@ Using the sample 'echo' command we defined earlier the above sample user input w
 
     // cmds/echo.js
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         options.iterations == 5; // true
         options.message === "Dance monkey, dance!"; // true
+        done();
     };
 
 Since the `message` option has `noName` set to true shotgun simply parses the user input and adds first non-named option to the options object under `message`. The order matters if the option has `noName` enabled.
@@ -227,8 +234,9 @@ would yield:
 
     // cmds/echo.js
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         options.verbose == true; // true
+        done();
     };
 
 Despite `verbose` not being defined as part of the `options` property of the command module, it is still accessible if provided by the user. It will just be optional, won't undergo any validation, and won't show up in that command modules help information.
@@ -305,8 +313,9 @@ Supplying `hidden: true` will cause the default "help" command to hide this opti
             password: true
         }
     };
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         // Do authentication stuff.
+        done();
     };
 
 In the above module there is no reason to display "--username" or "--password" in the help menu because users will almost never explicitly supply them. They will either include them with no names or be prompted for them.
@@ -377,8 +386,9 @@ What we did in a previous example is create a simple command called 'echo' that 
 
 The example command we just wrote is a pretty simple command. It performs a small task and only accepts one option. The nice thing about shotgun is that you don't have to do any pre-parsing of user input before passing it along to the module. Shotgun does all the legwork for you, allowing you to focus on creating well-designed command modules instead of worrying about user input, context, etc.
 
-    var result = shell.execute('echo -i 5 "Hello world!"');
-    console.log(result);
+    shell.execute('echo -i 5 "Hello world!"', function (result) {
+        console.log(result);
+    });
 
 This would yield:
 
@@ -422,8 +432,9 @@ Shotgun has a few built-in commands and one of those is 'help'. When the help co
 
 The shell instance has an execute function. This is the primary entry point into the shotgun module. It takes in a command line string, parses it appropriately, and returns a result object.
 
-    var result = shell.execute('help');
-    console.log(result);
+    shell.execute('help', function (result) {
+        console.log(result);
+    });
 
 This would yield:
 
@@ -456,70 +467,82 @@ This would yield:
 
 ### The `invoke` function and the result object.
 
-The `shell.execute()` function always returns a result object. You are able to access this result object from within your command module's `invoke` function via the `this` keyword; it is often a good idea to assign `this` to a variable in order to maintain reference to it. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as shotgun will add context information to it for you; if you overwrite this object you will lose this information and your app may exhibit unexpected behavior.
+The `shell.execute()` function always passes a result object to the callback. You are able to access this result object from within your command module's `invoke` function via the `this` keyword; it is often a good idea to assign `this` to a variable in order to maintain reference to it. You are allowed to add any properties you wish to this object, though it is not recommended that you overwrite this object altogether as shotgun will add context information to it for you; if you overwrite this object you will lose this information and your app may exhibit unexpected behavior.
 
 The result object contains helper functions. While you could manually push an object to the lines array on the result object:
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         this.lines.push({
             options: { charByChar: true },
             type: 'log',
             text: 'This is an example of manually adding a line of text to the lines array.'
         });
+        done();
     };
 
 It is far more convenient to use the provided helper functions:
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         this.log('This is an example of using the log() function.');
+        done();
     };
 
 The text helper functions such as `log()`, `warn()`, `error()`, and `debug()`, accept an options object as a second argument if needed. This options object is added to the line object before the line object is added to the lines array.
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         this.log('If possible, the UI should display this line bolded, italicized, and underlined.', {
             bold: true,
             italic: true,
             underline: true
         });
+        done();
     };
 
 There are standard properties that shotgun adds to the result object such as `context`, `lines`, `clearDisplay`, and `exit`. You can change these options when necessary, but you are also welcome to add your own values.
 
     // cmds/mycommand.js
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         this.customValue = 'This is a custom value.';
+        done();
     };
 
     // app.js
 
-    console.log(shell.execute('mycommand').customValue);
+    shell.execute('mycommand', function (result) {
+        console.log(result.customValue);
+    });
 
 `shell.execute` also takes an options object in case you need to make values available to a command without them needing to be supplied as user input.
 
     // app.js
 
-    shell.execute('mycommand', { someValue: true });
+    shell.execute('mycommand', { someValue: true }, function (result) {
+        // ...
+    });
 
     // cmds/mycommand.js
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         this.log('Custom value: ' + options.someValue);
+        done();
     };
 
 Values supplied in this manner will override user input that matches it, so be mindful of the options you pass in. For example:
 
     // app.js
 
-    shell.execute('mycommand --someValue "pizza"', { someValue: 'bacon' });
+    shell.execute('mycommand --someValue "pizza"', { someValue: 'bacon' }, function (result) {
+        // ...
+    });
 
 will yield:
 
     // cmds/mycommand.js
 
-    exports.invoke = function (options, shell) {
+    exports.invoke = function (options, shell, done) {
         options.someValue === 'bacon'; // true
+        done();
     };
 
 ### Setting a helpful command context.

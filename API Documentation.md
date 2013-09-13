@@ -12,9 +12,12 @@ An optional object containing various options.
 
 **cmdsDir (string)** - If specified then shotgun will use this directory to look for your command modules. Defaults to 'shotgun_cmds'.
 
+**defaultModules (object)** - Any default command modules will appear as properties here and are set to 'true' by default. You can set any or all of them to false if needed and they will not load.
+
 **namespace (string)** - Identifies this shell instance. Particularly useful when shotgun-client is used to create browser consoles. Defaults to 'shotgun'.
 
-**defaultModules (object)** - Any default command modules will appear as properties here and are set to 'true' by default. You can set any or all of them to false if needed and they will not load.
+**loadNpmCmds (bool)** - Instructs shotgun not to load command modules installed via NPM.
+
 
 ### Properties
 
@@ -48,14 +51,20 @@ Hopefully you can see how this might be done in a loop where the user can contin
 
 **options** - The user is able to specify options in their input using the format `--option value` but you can override supplied options or pass in additional options by passing them in as properties on this options object.
 
-    var cmdResponse = shell.execute('echo --iterations 5', {}, { iterations: 10 });
     // The echo command module will have 10 as the value of the iterations option instead of 5 as the user supplied.
+    shell.execute('echo --iterations 5', {}, { iterations: 10 }, function (result) {
+        // ...
+    });
+
+**callback** - The shotgun result object is passed into this callback function. The use of a callback function (rather than returning a result object) allows shotgun to handle asynchronous work. This allows you to write asynchronous code within your command modules.
 
 ---
 
 ## CommandResponse
 
-    var commandResponse = shell.execute('echo "hello world"');
+    shell.execute('echo "hello world"', function (commandResponse) {
+        // ...
+    });
 
 ### Properties
 
