@@ -150,6 +150,7 @@ Shotgun command modules are just Node modules. There isn't anything special abou
         for (var count = 0; count < iterations; count++) {
             res.log(options.message);
         }
+        done();
     };
 
 Within the `invoke` function three arguments are passed in for you to use. The first is `options` which simply stores all the user-supplied options when invoking your command. The second argument is the instance of the shotgun `shell`. The shell allows you to access other command modules via the `cmds` collection. The third argument is the `done` callback function. This callback function is new as of shotgun v3.0 and is a major improvement. You can now do asynchronous work in your command modules and then invoke the done callback to let shotgun know that you your work is finished.
