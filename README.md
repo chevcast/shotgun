@@ -133,7 +133,7 @@ That's it, you're done with your first little shotgun app!
 
 ## Creating a Shotgun Command Module
 
-Shotgun command modules are just Node modules. There isn't anything special about them except that they must define a specific function called 'invoke'.
+Shotgun command modules are just Node modules. There isn't anything special about them except that they must define a specific function called 'invoke'. As with any node module you are free to create a named "some-command.js" file or a directory "some-command" with an "index.js" file placed inside it. If your command is growing in complexity it is suggested that you put it in its own directory and split up some of the functionality for that command into separate files for readability.
 
     // cmds/echo.js
 
@@ -556,3 +556,19 @@ Notice how the user was able to run the 'help' command after the 'topic 123' con
     this.resetContext();
 
 I usually use this helper if I'm clearing the display from another command. The included 'clear' command module already does this, but sometimes other command modules I write will also clear the screen. For example, I wrote an 'about.js' command module that displays several paragraphs of text. I don't want to simply append all that text to whatever else is already in the user's current display so I made my 'about' command set `this.clearDisplay = true;`. Now let's say that the user had executed 'topic 123' and is currently viewing the topic body. Now say the user decides to execute the 'about' command. The command clears the display so the topic body is no longer visible. From the user's perspective it wouldn't make sense at this point for '-r' to allow the user to reply to topic 123. There may be exceptions, but anytime the display is cleared it makes sense to also reset any command contexts.
+
+---
+
+## Publishing Your Shotgun Command Modules to NPM
+
+Shotgun even supports the ability to publish command modules to NPM. To do this simply write your command module and publish it to NPM as you would any node module, except the name must begin with "shotguncmd-".
+
+This ability allows anyone to "npm install shotguncmd-*some-command*" and shotgun will automatically load that command module. By default shotgun automatically searches your node_modules folder for any modules that begin with "shotguncmd-". You can disable this behavior by passing `loadNpmCmds: false` as an option when instantiating the shell. Here is an example of using multiple shell instances and disabling NPM command module loading in one of them:
+
+    // Will look in shotgun_cmds at the root of your project for command modules to load.
+    // Will load NPM command modules by default.
+    var shell1 = new shotgun.Shell();
+
+    // Will look in shell2_cmds at the root of your project for command modules to load.
+    // Will not load NPM command modules.
+    var shell2 = new shotgun.Shell({ cmdsDir: 'shell2_cmds', loadNpmCmds: false });

@@ -12,6 +12,7 @@ var fs = require('fs'),
             help: true,
             exit: true
         },
+        loadNpmCmds: true,
         helpers: {},
         debug: false
     };
@@ -37,32 +38,46 @@ module.exports.Shell = function (options) {
 
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function(cmdPath) {
-        var cmd = require(cmdPath);
-        var cmdName = path.basename(cmdPath, '.js').toLowerCase();
-        if (cmd && cmd.invoke) {
-            cmd.name = cmdName.toLowerCase();
-            shell.cmds[cmdName] = cmd;
+        try {
+            var cmd = require(cmdPath);
+            var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
+            if (cmd && cmd.invoke) {
+                cmd.name = cmdName.toLowerCase();
+                shell.cmds[cmdName] = cmd;
+            }
+            else if (settings.debug)
+                console.warn("%s is not a valid shotgun command module and was not loaded.", cmdPath);
+        } catch (ex) {
+            if (settings.debug)
+                console.error("There was a problem loading %s.", cmdPath);
         }
-        else if (settings.debug)
-            console.warn('%s.js is not a valid shotgun command module and was not loaded.', cmdName);
     };
 
     // Reads all command modules from the specified directory and loads them.
     shell.readCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
-            if (files) {
+            if (files)
                 files.forEach(function (file) {
                     shell.loadCommandModule(path.resolve(dir, file));
                 });
-            }
         }
     };
 
     // Load default command modules.
     for (var key in settings.defaultCmds) {
         if (settings.defaultCmds[key])
-            shell.loadCommandModule(path.resolve(__dirname, 'default_cmds', key + '.js'));
+            shell.loadCommandModule(path.resolve(__dirname, 'default_cmds', key));
+    }
+
+    // Load npm command modules.
+    if (settings.loadNpmCmds) {
+        var nodeModules = fs.readdirSync(path.resolve(__dirname, '..'));
+        if (nodeModules)
+            nodeModules.forEach(function (module) {
+                if (module.indexOf('shotguncmd-') === 0)
+                    shell.loadCommandModule(path.resolve(__dirname, '..', module));
+            });
     }
 
     // Load custom command modules.
