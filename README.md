@@ -118,7 +118,7 @@ Once you've setup shotgun and instantiated the shell you can build any UI applic
 
         rl.on('line', function (cmdStr) {
             // Pass in the context object.
-            var result = shell.execute(cmdStr, context, function (result) {
+            shell.execute(cmdStr, context, function (result) {
                 context = result.context; // Overwrite context object with updated context object from shotgun.
                 if (result.clearDisplay)
                     console.log('\u001B[2J\u001B[0;0f');
