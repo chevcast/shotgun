@@ -1,0 +1,11 @@
+# shotgun
+
+[![Build Status](https://travis-ci.org/Chevex/shotgun.png)](https://travis-ci.org/Chevex/shotgun)
+[![Dependencies Status](https://gemnasium.com/Chevex/shotgun.png)](https://gemnasium.com/Chevex/shotgun)
+[![NPM version](https://badge.fury.io/js/shotgun.png)](http://badge.fury.io/js/shotgun)
+
+> NOTE: Shotgun 3.0.0 and higher now uses a new asynchronous model allowing you to do asynchronous work within your command modules. This document has been updated to reflect the changes to the API. Version 3.0.0 and higher is no longer compatible with previous versions. If you use shotgun-client for web-based shell functionality then please update to shotgun-client v3.1.0 or higher.
+
+> Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it, including web applications. In fact, I took the liberty of writing a separate module called [shotgun-client](https://npmjs.org/package/shotgun-client) that makes it simple to integrate shotgun with any web application.
+
+To learn more head over to the [shotgun wiki](https://github.com/Chevex/shotgun/wiki).
