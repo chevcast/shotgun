@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Chevex/node-shotgun.git"
+    "url": "https://github.com/Chevex/shotgun.git"
   },
   "keywords": [
     "command",
