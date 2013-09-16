@@ -81,7 +81,7 @@ module.exports = exports = function (res, options, cmd) {
                         // If the provided validation function throws an error at any point then handle it
                         // gracefully and simply fail validation.
                     catch (ex) {
-                        res.error('invalid value for "' + key + '"');
+                        res.error(ex.message);
                         return false;
                     }
                 }
