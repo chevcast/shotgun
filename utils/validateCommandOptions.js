@@ -1,5 +1,4 @@
-module.exports = exports = function (res, options, cmd) {
-
+module.exports = exports = function (options, cmd, shell) {
     // If the command has pre-defined options then parse through them and validate against the supplied options.
     if (cmd.options) {
 
@@ -32,17 +31,13 @@ module.exports = exports = function (res, options, cmd) {
             // B) The option was supplied but without a value.
             if (definedOption.prompt) {
                 if ((!(key in options) && definedOption.required) || (key in options && options[key] === true)) {
-                    res.context.prompt = {
-                        option: key,
-                        cmd: cmd.name,
-                        options: options
-                    };
+                    shell.setPrompt(key, cmd.name, options);
                     if (definedOption.password)
-                        res.password = true;
+                        shell.password();
                     if (typeof(definedOption.prompt) !== 'boolean')
-                        res.log(definedOption.prompt);
+                        shell.log(definedOption.prompt);
                     else
-                        res.log('Enter value for ' + key + '.');
+                        shell.log('Enter value for ' + key + '.');
                     // Return immediately without further validation.
                     return false;
                 }
@@ -60,7 +55,7 @@ module.exports = exports = function (res, options, cmd) {
                 if (definedOption.validate instanceof RegExp) {
                     // If value does not pass validation then do not invoke command and write error message.
                     if (!definedOption.validate.test(options[key])) {
-                        res.error('invalid value for "' + key + '"');
+                        shell.error('invalid value for "' + key + '"');
                         return false;
                     }
                 }
@@ -72,16 +67,16 @@ module.exports = exports = function (res, options, cmd) {
                         var validationResult = definedOption.validate(options[key], options);
                         if (validationResult !== true) {
                             if (typeof(validationResult) !== 'string')
-                                res.error('invalid value for "' + key + '"');
+                                shell.error('invalid value for "' + key + '"');
                             else
-                                res.error(validationResult);
+                                shell.error(validationResult);
                             return false;
                         }
                     }
                         // If the provided validation function throws an error at any point then handle it
                         // gracefully and simply fail validation.
                     catch (ex) {
-                        res.error(ex.message);
+                        shell.error(ex.message);
                         return false;
                     }
                 }
@@ -89,11 +84,11 @@ module.exports = exports = function (res, options, cmd) {
 
             // If option is required but is not found in supplied options then error.
             if (definedOption.required && !(key in options)) {
-                res.error('missing parameter "' + key + '"');
+                shell.error('missing parameter "' + key + '"');
                 return false;
             }
         }
     }
     // If we made it this far then all options are valid so return true.
     return true;
-}
+};

@@ -9,9 +9,8 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell, done) {
-    var res = this,
-        cmdNames = [];
+exports.invoke = function (options, shell) {
+    var cmdNames = [];
 
     // Populate cmdNames with all command module names and sort the array alphabetically.
     for (var key in shell.cmds)
@@ -19,7 +18,7 @@ exports.invoke = function (options, shell, done) {
             cmdNames.push(key);
     cmdNames.sort();
 
-    res.log();
+    shell.log();
 
     // If no command was passed in as an argument to the help command then display the generic help menu listing all available commands.
     if (!options.command) {
@@ -45,27 +44,27 @@ exports.invoke = function (options, shell, done) {
             // If there are 5 commands or less then type the lines character by character.
             // If there are more than 5 commands then do not type them out as it takes too long and the effect isn't worth the wait.
             if (!cmd.hidden)
-                res.log(helpStr, { dontType: cmdNames.length > 5 });
+                shell.log(helpStr, { dontType: cmdNames.length > 5 });
         }
-        res.log();
+        shell.log();
     }
     // If a command was passed in as an argument to the help command then display more specific help information for the specified command.
     else {
         var cmd = shell.cmds[options.command];
         if (!cmd)
-            res.error(options.command + ' is not a valid command name.');
+            shell.error(options.command + ' is not a valid command name.');
         else {
 
             // Display the command's description if it has one.
             if (cmd.description) {
-                res.log(cmd.description);
-                res.log();
+                shell.log(cmd.description);
+                shell.log();
             }
 
             // If a "usage key" is specified then display it.
             if (cmd.usage) {
-                res.log('Usage: "' + options.command + ' ' + cmd.usage + '"');
-                res.log();
+                shell.log('Usage: "' + options.command + ' ' + cmd.usage + '"');
+                shell.log();
             }
 
             // If the command defines options that it recognizes then iterate over those and display information about them.
@@ -86,8 +85,8 @@ exports.invoke = function (options, shell, done) {
                     }
                 }
                 if (strs.length > 0) {
-                    res.log('Options:');
-                    res.log();
+                    shell.log('Options:');
+                    shell.log();
                     for (var index in strs) {
                         var option = strs[index].option,
                             optionStr = strs[index].str;
@@ -95,12 +94,11 @@ exports.invoke = function (options, shell, done) {
                             optionStr += new Array((maxLength - optionStr.length) + 5).join(' ');
                             optionStr += option.description;
                         }
-                        res.log(optionStr, { dontType: true });
+                        shell.log(optionStr, { dontType: true });
                     }
-                    res.log();
+                    shell.log();
                 }
             }
         }
     }
-    done();
 };

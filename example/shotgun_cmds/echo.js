@@ -18,9 +18,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell, done) {
-    var res = this;
+exports.invoke = function (options, shell) {
     for (var count = 0; count < options.iterations; count++)
-        res.log(options.message);
-    done();
+        shell.log(options.message);
 };

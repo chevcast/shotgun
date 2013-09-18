@@ -1,0 +1,11 @@
+{
+    "namespace" : "shotgun",
+    "cmdsDir" : "shotgun_cmds",
+    "defaultCmds" : {
+        "clear" : true,
+        "help" : true,
+        "exit" : true
+    },
+    "loadNpmCmds" : true,
+    "debug" : false
+}
