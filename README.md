@@ -6,6 +6,4 @@
 
 Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Rather than assuming the UI, such as the Javascript console, shotgun returns a result object that acts as a set of instructions so that any application can easily consume it, including web applications. In fact, I took the liberty of writing a separate module called [shotgun-client](https://npmjs.org/package/shotgun-client) that makes it simple to integrate shotgun with any web application.
 
-_**NOTE:** Shotgun 4.0.0 and higher now uses a new asynchronous model allowing for a more intuitive API. It also allows you to do asynchronous work within your command modules. This document has been updated to reflect the changes to the API. Version 4.0.0 and higher is no longer compatible with previous versions. If you use shotgun-client for web-based shell functionality then please update to shotgun-client v4.0.0 or higher as well._
-
 To learn more head over to the [shotgun wiki](https://github.com/Chevex/shotgun/wiki).
