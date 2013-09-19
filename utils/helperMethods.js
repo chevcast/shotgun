@@ -17,6 +17,7 @@ module.exports = exports = function (shell) {
             if (shell.settings.debug)
                 console.error(ex.message);
         }
+        return shell;
     };
 
     // Reads all command modules from the specified directory and loads them.
@@ -28,38 +29,43 @@ module.exports = exports = function (shell) {
                     shell.loadCommandModule(path.resolve(dir, file));
                 });
         }
+        return shell;
     };
 
     // Default helper functions.
     shell.send = function () {
         if (shell.settings.debug)
             console.error("No data handler has been set. Use \"shell.onData(callback)\" to set one.");
+        return shell;
     };
 
     // Create a generic data callback.
     shell.onData = function (callback) {
-        shell.send = callback;
+        shell.send = function (data) {
+            callback(data);
+            return shell;
+        };
         return shell;
     };
 
     // Clear display helper function.
     shell.clearDisplay = function () {
-        shell.send({ clearDisplay: true });
+        return shell.send({ clearDisplay: true });
     };
 
     // Exit helper function.
     shell.exit = function () {
-        shell.send({ exit: true });
+        return shell.send({ exit: true });
     };
 
     // Password helper function.
     shell.password = function () {
-        shell.send({ password: true });
+        return shell.send({ password: true });
     };
 
     // Log helper functions.
     shell.log = function (text, options) {
-        shell.send({
+        return shell.send({
             line: {
                 options: options || {},
                 type: 'log',
@@ -68,7 +74,7 @@ module.exports = exports = function (shell) {
         });
     };
     shell.warn = function (text, options) {
-        shell.send({
+        return shell.send({
             line: {
                 options: options || {},
                 type: 'warn',
@@ -77,7 +83,7 @@ module.exports = exports = function (shell) {
         });
     };
     shell.error = function (text, options) {
-        shell.send({
+        return shell.send({
             line: {
                 options: options || {},
                 type: 'error',
@@ -86,7 +92,7 @@ module.exports = exports = function (shell) {
         });
     };
     shell.debug = function (text, options) {
-        shell.send({
+        return shell.send({
             line: {
                 options: options || {},
                 type: 'debug',
@@ -96,39 +102,54 @@ module.exports = exports = function (shell) {
     };
 
     // Create context helper functions. Callback is invoked anytime the context changes and is optional.
-    var contextCallback;
-    shell.onContext = function (callback) {
-        contextCallback = callback;
+    var contextChangedCallback = function () {
+        if (shell.settings.debug)
+            console.error("No context handler has been set. Use \"shell.onContext(callback)\" to set one.");
         return shell;
     };
-    shell.setContext = function (context) {
-        shell.context = context;
-        if (contextCallback) contextCallback(shell.context);
+    shell.modifyContext = function (callback) {
+        callback(shell.context);
+        return contextChangedCallback();
+    };
+
+    shell.onContextChanged = function (callback) {
+        contextChangedCallback = function () {
+            callback(shell.context);
+            return shell;
+        };
         return shell;
+    };
+    shell.setContext = function (newContext) {
+        shell.context = newContext;
+        return contextChangedCallback();
     };
     shell.setPassive = function (cmdStr, msg) {
-        shell.context.passive = {
-            cmdStr: cmdStr,
-            msg: msg || cmdStr
-        };
-        if (contextCallback) contextCallback(shell.context);
+        return shell.modifyContext(function (context) {
+            context.passive = {
+                cmdStr: cmdStr,
+                msg: msg || cmdStr
+            };
+        });
     };
     shell.setPrompt = function(key, cmdName, options) {
-        shell.context.prompt = {
-            option: key,
-            cmd: cmdName,
-            options: options
-        };
-        if (contextCallback) contextCallback(shell.context);
+        return shell.modifyContext(function (context) {
+            context.prompt = {
+                option: key,
+                cmd: cmdName,
+                options: options
+            };
+        });
     };
     shell.clearPrompt = function () {
-        if (shell.context.hasOwnProperty('prompt'))
-            delete shell.context.prompt;
-        if (contextCallback) contextCallback(shell.context);
+        return shell.modifyContext(function (context) {
+            if (context.hasOwnProperty('prompt'))
+                delete context.prompt;
+        });
     };
     shell.clearPassive = function () {
-        if (shell.context.hasOwnProperty('passive'))
-            delete shell.context.passive;
-        if (contextCallback) contextCallback(shell.context);
+        return shell.modifyContext(function (context) {
+            if (context.hasOwnProperty('passive'))
+                delete context.passive;
+        });
     };
-}
+};

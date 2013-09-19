@@ -11,7 +11,7 @@ shell
     // Set the object that shotgun should use to maintain context information.
     .setContext(context)
     // This callback is fired every time the context object is modified.
-    .onContext(function (context) {
+    .onContextChanged(function (context) {
         if (context.passive)
             // Set prompt text in console window to show context info.
             rl.setPrompt(context.passive.msg + " > ");

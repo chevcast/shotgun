@@ -181,7 +181,6 @@ describe('Shotgun', function () {
             shell
                 .setContext(context)
                 .execute('topic 123');
-
             should.exist(context);
             context.should.have.property('passive').with.property('cmdStr', 'topic 123');
         });
