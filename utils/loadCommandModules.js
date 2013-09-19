@@ -3,7 +3,7 @@ var fs = require('fs'),
 
 module.exports = exports = function (shell) {
     // Load custom command modules.
-    shell.readCommandModules(shell.settings.cmdsDir);
+    shell.loadCommandModules(shell.settings.cmdsDir);
 
     // Load default command modules.
     for (var key in shell.settings.defaultCmds) {

@@ -20,8 +20,8 @@ module.exports = exports = function (shell) {
         return shell;
     };
 
-    // Reads all command modules from the specified directory and loads them.
-    shell.readCommandModules = function(dir) {
+    // Loads all command modules from the specified directory and loads them.
+    shell.loadCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
             if (files)
@@ -33,9 +33,7 @@ module.exports = exports = function (shell) {
     };
 
     // Default helper functions.
-    shell.send = function () {
-        if (shell.settings.debug)
-            console.error("No data handler has been set. Use \"shell.onData(callback)\" to set one.");
+    var contextChangedCallback = shell.send = function () {
         return shell;
     };
 
@@ -101,12 +99,6 @@ module.exports = exports = function (shell) {
         });
     };
 
-    // Create context helper functions. Callback is invoked anytime the context changes and is optional.
-    var contextChangedCallback = function () {
-        if (shell.settings.debug)
-            console.error("No context handler has been set. Use \"shell.onContext(callback)\" to set one.");
-        return shell;
-    };
     shell.modifyContext = function (callback) {
         callback(shell.context);
         return contextChangedCallback();
@@ -119,7 +111,7 @@ module.exports = exports = function (shell) {
         };
         return shell;
     };
-    shell.setContext = function (newContext) {
+    shell.setContextStorage = function (newContext) {
         shell.context = newContext;
         return contextChangedCallback();
     };

@@ -9,7 +9,7 @@ var rl = readline.createInterface(process.stdin, process.stdout);
 // Configure shotgun.
 shell
     // Set the object that shotgun should use to maintain context information.
-    .setContext(context)
+    .setContextStorage(context)
     // This callback is fired every time the context object is modified.
     .onContextChanged(function (context) {
         if (context.passive)
@@ -21,8 +21,9 @@ shell
     })
     // This callback is fired every time shotgun sends data back to your application.
     .onData(function (data) {
+        console.log(data);
         if (data.clearDisplay)
-        // Some stupid and unintuitive escape sequence for clearing console windows...
+            // Some stupid and unintuitive escape sequence for clearing console windows...
             console.log('\u001B[2J\u001B[0;0f');
         if (data.line)
             console[data.line.type](data.line.text);

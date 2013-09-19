@@ -112,7 +112,7 @@ describe('Shotgun', function () {
                 lineCount = 0;
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .onData(function (data) {
                     should.exist(data);
                     data.should.have.property('line').with.property('text', 'Please enter your username.');
@@ -179,7 +179,7 @@ describe('Shotgun', function () {
             var context = {};
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .execute('topic 123');
             should.exist(context);
             context.should.have.property('passive').with.property('cmdStr', 'topic 123');
@@ -190,7 +190,7 @@ describe('Shotgun', function () {
                 lineCount = 0;
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .onData(function (data) {
                     should.exist(data);
                     data.should.have.property('line').with.property('text', '[topic 123 content]');
@@ -215,7 +215,7 @@ describe('Shotgun', function () {
                 lineCount = 0;
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .onData(function (data) {
                     should.exist(data);
                     data.should.have.property('line').with.property('text', '[topic 123 content]');
@@ -231,7 +231,7 @@ describe('Shotgun', function () {
                 lineCount = 0;
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .onData(function (data) {
                     should.exist(data);
                     data.should.have.property('line').with.property('text', '[topic 123 content]');
@@ -256,7 +256,7 @@ describe('Shotgun', function () {
             var context = {};
 
             shell
-                .setContext(context)
+                .setContextStorage(context)
                 .execute('topic 123');
 
             should.exist(context);
