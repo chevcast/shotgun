@@ -21,7 +21,6 @@ shell
     })
     // This callback is fired every time shotgun sends data back to your application.
     .onData(function (data) {
-        console.log(data);
         if (data.clearDisplay)
             // Some stupid and unintuitive escape sequence for clearing console windows...
             console.log('\u001B[2J\u001B[0;0f');
