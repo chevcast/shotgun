@@ -15,7 +15,7 @@ module.exports = exports = function (shell) {
                 console.warn("%s is not a valid shotgun command module and was not loaded.", cmdPath);
         } catch (ex) {
             if (shell.settings.debug)
-                console.error(ex.message);
+                console.error("%s failed to load with exception: %s", cmdPath, ex.message);
         }
         return shell;
     };
