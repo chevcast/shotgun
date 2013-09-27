@@ -1,5 +1,6 @@
 var should = require('chai').should(),
-    shotgun = require('../index');
+    shotgun = require('../index'),
+    path = require('path');
 
 describe('Shotgun', function () {
 
@@ -8,7 +9,7 @@ describe('Shotgun', function () {
     beforeEach(function () {
         shell = new shotgun.Shell({
             // Use example app's commands for these tests.
-            cmdsDir: 'example/shotgun_cmds',
+            cmdsDir: path.join(__dirname, '..', 'example', 'shotgun_cmds'),
             loadNpmCmds: false
         });
     });

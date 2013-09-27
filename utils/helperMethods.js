@@ -5,14 +5,19 @@ module.exports = exports = function (shell) {
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function(cmdPath) {
         try {
-            var cmd = require(cmdPath);
-            var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
-            if (cmd && cmd.invoke) {
-                cmd.name = cmdName.toLowerCase();
-                shell.cmds[cmdName] = cmd;
+            var stats = fs.statSync(cmdPath);
+            if (stats) {
+                if (path.extname(cmdPath).toLowerCase() === '.js' || stats.isDirectory()) {
+                    var cmd = require(cmdPath);
+                    var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
+                    if (cmd && cmd.invoke) {
+                        cmd.name = cmdName.toLowerCase();
+                        shell.cmds[cmdName] = cmd;
+                    }
+                    else if (shell.settings.debug)
+                        console.warn("%s is not a valid shotgun command module and was not loaded.", cmdPath);
+                }
             }
-            else if (shell.settings.debug)
-                console.warn("%s is not a valid shotgun command module and was not loaded.", cmdPath);
         } catch (ex) {
             if (shell.settings.debug)
                 console.error("%s failed to load with exception: %s", cmdPath, ex.message);
