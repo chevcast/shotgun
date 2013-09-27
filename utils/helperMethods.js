@@ -129,7 +129,7 @@ module.exports = exports = function (shell) {
                 option: key,
                 cmd: cmdName,
                 options: options,
-                msg: msg || "{0} {1}".format(cmdName, key)
+                msg: msg || key
             };
         });
     };
