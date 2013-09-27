@@ -2,6 +2,12 @@ var fs = require('fs'),
     path = require('path');
 
 module.exports = exports = function (shell) {
+
+    // regex to test if file name is valid
+    // used to prevent loading non-js file that are in cmd-dir
+    // example would be an IDE creating .tmp or .swp files
+    var jsFileRegexTest = /([a-zA-Z0-9_-])\.js$/i; 
+    
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function(cmdPath) {
         try {
@@ -26,7 +32,9 @@ module.exports = exports = function (shell) {
             var files = fs.readdirSync(dir);
             if (files)
                 files.forEach(function (file) {
-                    shell.loadCommandModule(path.resolve(dir, file));
+                    if(jsFileRegexTest.test(file)){
+                        shell.loadCommandModule(path.resolve(dir, file));
+                    }
                 });
         }
         return shell;
