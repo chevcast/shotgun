@@ -27,8 +27,8 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // Prompt the user for value if:
-            // A) The option was not supplied and it is required.
-            // B) The option was supplied but without a value.
+            // A) The option was not supplied and it is required or
+            // B) the option was supplied but without a value.
             if (definedOption.prompt) {
                 if ((!(key in options) && definedOption.required) || (key in options && options[key] === true)) {
                     shell.setPrompt(key, cmd.name, options);

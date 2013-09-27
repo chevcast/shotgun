@@ -123,12 +123,13 @@ module.exports = exports = function (shell) {
             };
         });
     };
-    shell.setPrompt = function(key, cmdName, options) {
+    shell.setPrompt = function(key, cmdName, options, msg) {
         return shell.modifyContext(function (context) {
             context.prompt = {
                 option: key,
                 cmd: cmdName,
-                options: options
+                options: options,
+                msg: msg || "{0} {1}".format(cmdName, key)
             };
         });
     };
