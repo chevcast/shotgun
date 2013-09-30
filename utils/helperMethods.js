@@ -38,7 +38,7 @@ module.exports = exports = function (shell) {
     };
 
     // Default helper functions.
-    var contextChangedCallback = shell.send = function () {
+    shell.send = shell.contextChanged = function () {
         return shell;
     };
 
@@ -105,23 +105,22 @@ module.exports = exports = function (shell) {
     };
 
     shell.onContextChanged = function (callback) {
-        contextChangedCallback = function () {
+        shell.contextChanged = function () {
             callback(shell.context);
             return shell;
         };
-        require('watchjs').watch(shell.context, contextChangedCallback, 5, true);
         return shell;
     };
     shell.setContextStorage = function (newContext) {
         shell.context = newContext;
-        return contextChangedCallback();
+        return shell.contextChanged();
     };
     shell.setPassive = function (cmdStr, msg) {
         shell.context.passive = {
             cmdStr: cmdStr,
             msg: msg || cmdStr
         };
-        return shell;
+        return shell.contextChanged();
     };
     shell.setPrompt = function(key, cmdName, options, msg) {
         shell.context.prompt = {
@@ -130,16 +129,16 @@ module.exports = exports = function (shell) {
             options: options,
             msg: msg || key
         };
-        return shell;
+        return shell.contextChanged();
     };
     shell.clearPrompt = function () {
         if (shell.context.hasOwnProperty('prompt'))
             delete shell.context.prompt;
-        return shell;
+        return shell.contextChanged();
     };
     shell.clearPassive = function () {
         if (context.hasOwnProperty('passive'))
             delete context.passive;
-        return shell;
+        return shell.contextChanged();
     };
 };
