@@ -109,7 +109,7 @@ module.exports = exports = function (shell) {
             callback(shell.context);
             return shell;
         };
-        shell.watch('context', contextChangedCallback);
+        require('watchjs').watch(shell.context, contextChangedCallback, 5, true);
         return shell;
     };
     shell.setContextStorage = function (newContext) {

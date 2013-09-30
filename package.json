@@ -6,7 +6,8 @@
   "dependencies": {
     "optimist": "*",
     "shell-quote": "*",
-    "extend": "*"
+    "extend": "*",
+    "watchjs": "*"
   },
   "devDependencies": {
     "mocha": "*",
