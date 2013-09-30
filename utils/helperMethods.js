@@ -86,6 +86,8 @@ module.exports = exports = function (shell) {
         });
     };
     shell.error = function (text, options) {
+        if (shell.settings.debug)
+            console.error(text);
         return shell.send({
             line: {
                 options: options || {},
