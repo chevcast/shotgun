@@ -137,8 +137,8 @@ module.exports = exports = function (shell) {
         return shell.contextChanged();
     };
     shell.clearPassive = function () {
-        if (context.hasOwnProperty('passive'))
-            delete context.passive;
+        if (shell.context.hasOwnProperty('passive'))
+            delete shell.context.passive;
         return shell.contextChanged();
     };
 };
