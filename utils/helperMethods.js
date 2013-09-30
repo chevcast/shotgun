@@ -104,16 +104,12 @@ module.exports = exports = function (shell) {
         });
     };
 
-    shell.modifyContext = function (callback) {
-        callback(shell.context);
-        return contextChangedCallback();
-    };
-
     shell.onContextChanged = function (callback) {
         contextChangedCallback = function () {
             callback(shell.context);
             return shell;
         };
+        shell.watch('context', contextChangedCallback);
         return shell;
     };
     shell.setContextStorage = function (newContext) {
@@ -121,33 +117,29 @@ module.exports = exports = function (shell) {
         return contextChangedCallback();
     };
     shell.setPassive = function (cmdStr, msg) {
-        return shell.modifyContext(function (context) {
-            context.passive = {
-                cmdStr: cmdStr,
-                msg: msg || cmdStr
-            };
-        });
+        shell.context.passive = {
+            cmdStr: cmdStr,
+            msg: msg || cmdStr
+        };
+        return shell;
     };
     shell.setPrompt = function(key, cmdName, options, msg) {
-        return shell.modifyContext(function (context) {
-            context.prompt = {
-                option: key,
-                cmd: cmdName,
-                options: options,
-                msg: msg || key
-            };
-        });
+        shell.context.prompt = {
+            option: key,
+            cmd: cmdName,
+            options: options,
+            msg: msg || key
+        };
+        return shell;
     };
     shell.clearPrompt = function () {
-        return shell.modifyContext(function (context) {
-            if (context.hasOwnProperty('prompt'))
-                delete context.prompt;
-        });
+        if (shell.context.hasOwnProperty('prompt'))
+            delete shell.context.prompt;
+        return shell;
     };
     shell.clearPassive = function () {
-        return shell.modifyContext(function (context) {
-            if (context.hasOwnProperty('passive'))
-                delete context.passive;
-        });
+        if (context.hasOwnProperty('passive'))
+            delete context.passive;
+        return shell;
     };
 };
