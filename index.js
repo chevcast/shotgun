@@ -16,10 +16,6 @@ module.exports.Shell = function (options) {
     // Attach settings to shell.
     shell.settings = settings;
 
-    // Set namespace for this shell instance. If no namespace is supplied then use the cmdsDir.
-    // If no cmdsDir is specified then use 'cmds' by default.
-    shell.namespace = settings.namespace;
-
     // This property will store all the available command modules.
     shell.cmds = {};
 
