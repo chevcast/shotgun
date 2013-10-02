@@ -45,7 +45,10 @@ module.exports = exports = function (cmdStr, context, options) {
         // If the command module exists then process it's options and invoke the module.
         if (cmd) {
             if (validateCommandOptions(options, cmd, shell))
-                return cmd.invoke(shell, options);
+                if (options['?'] || options['help'])
+                    shell.execute('help', context, { command: cmdName });
+                else
+                    cmd.invoke(shell, options);
         }
         else
             shell.error('"' + cmdName + '" is not a valid command');
