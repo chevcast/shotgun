@@ -8,6 +8,6 @@ Shotgun is a UI agnostic command shell. It allows you to quickly and easily writ
 
 ![](http://i.imgur.com/zUsgxFW.gif)
 
-- [The Wiki](https://github.com/Chevex/shotgun/wiki)
+- [Documentation](https://github.com/Chevex/shotgun/wiki)
 - [Source](https://github.com/Chevex/shotgun)
 - [Issues](https://github.com/Chevex/shotgun/issues)
