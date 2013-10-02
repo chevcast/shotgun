@@ -1,7 +1,5 @@
 exports.description = 'Clears the display.';
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (shell) {
     shell.clearDisplay();
-    shell.clearPrompt();
-    shell.clearPassive();
 };

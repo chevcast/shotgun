@@ -9,7 +9,7 @@ exports.options = {
     }
 };
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (shell, options) {
     var cmdNames = [];
 
     // Populate cmdNames with all command module names and sort the array alphabetically.

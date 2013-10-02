@@ -16,7 +16,7 @@ describe('Shotgun', function () {
 
     describe('shell', function () {
 
-        it('should invoke the onClearDisplay callback function.', function () {
+        it('should send clearDisplay:true when clear command is run.', function () {
             shell
                 .onData(function (data) {
                     should.exist(data);
@@ -25,7 +25,7 @@ describe('Shotgun', function () {
                 .execute('clear');
         });
 
-        it('should invoke the onExit callback function.', function () {
+        it('should send exit:true when exit command is run.', function () {
             shell
                 .onData(function (data) {
                     should.exist(data);
@@ -34,7 +34,7 @@ describe('Shotgun', function () {
                 .execute('exit');
         });
 
-        it('should print five lines to the display.', function () {
+        it('should understand command line options passed by the user.', function () {
             var lineCount = 0;
 
             shell
@@ -57,7 +57,7 @@ describe('Shotgun', function () {
                     data.should.have.property('line').with.property('text', 'test override');
                     lineCount++;
                 })
-                .execute('echo test -i 5', { message: 'test override', iterations: 10 });
+                .execute('echo test -i 5', null, { message: 'test override', iterations: 10 });
 
             lineCount.should.equal(10);
         });
@@ -90,36 +90,20 @@ describe('Shotgun', function () {
             lineCount.should.equal(1);
         });
 
-        it('should have the text printed from the echo command on all five lines.', function () {
-            var lineCount = 0;
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'node is my fave');
-                    lineCount++;
-                })
-                .execute('echo "node is my fave" -i 5');
-
-            lineCount.should.equal(5);
-        });
-
-    });
-
-    describe('prompt', function () {
-
-        it('should prompt for required values if not supplied.', function () {
+        it('should ask user for value if the option is required, prompt was set, and user did not supply a value.', function () {
             var context = {},
                 lineCount = 0;
 
             shell
-                .setContextStorage(context)
+                .onContextSave(function (updatedContext) {
+                    context = updatedContext;
+                })
                 .onData(function (data) {
                     should.exist(data);
                     data.should.have.property('line').with.property('text', 'Please enter your username.');
                     lineCount++;
                 })
-                .execute('login');
+                .execute('login', context);
 
             lineCount.should.equal(1);
 
@@ -133,7 +117,7 @@ describe('Shotgun', function () {
                         lineCount++;
                     }
                 })
-                .execute('charlie');
+                .execute('charlie', context);
 
             lineCount.should.equal(2);
 
@@ -143,12 +127,12 @@ describe('Shotgun', function () {
                     data.should.have.property('line').with.property('text', 'Welcome back charlie!');
                     lineCount++;
                 })
-                .execute('password123');
+                .execute('password123', context);
 
             lineCount.should.equal(3);
         });
 
-        it('should not prompt for required values if supplied.', function () {
+        it('should not prompt user for value if the option is required and prompt was set, but the user already supplied a value for that option.', function () {
             var lineCount = 0;
 
             shell
@@ -162,7 +146,7 @@ describe('Shotgun', function () {
             lineCount.should.equal(1);
         });
 
-        it('should set password to true.', function () {
+        it('should send password:true when an option specifies it is a password value and prompt is set.', function () {
             shell
                 .onData(function (data) {
                     should.exist(data);
@@ -176,97 +160,35 @@ describe('Shotgun', function () {
 
     describe('context', function () {
 
-        it('should set a command context.', function () {
+        it('should contain a custom variable when the command module calls the shell.setVar helper method.', function () {
             var context = {};
 
             shell
-                .setContextStorage(context)
-                .execute('topic 123');
+                .onContextSave(function (updatedContext) {
+                    context = updatedContext;
+                })
+                .execute('topic 123', context);
+
             should.exist(context);
-            context.should.have.property('passive').with.property('cmdStr', 'topic 123');
+            context.should.have.property('recentTopic', 123);
         });
 
-        it('should not send values to context command if input matches real command.', function () {
-            var context = {},
-                lineCount = 0;
-
-            shell
-                .setContextStorage(context)
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', '[topic 123 content]');
-                    lineCount++;
-                })
-                .execute('topic 123');
-
-            lineCount.should.equal(1);
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    lineCount++;
-                })
-                .execute('help');
-
-            lineCount.should.equal(9);
-        });
-
-        it('should send values to context command if input does not match real command.', function () {
-            var context = {},
-                lineCount = 0;
-
-            shell
-                .setContextStorage(context)
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', '[topic 123 content]');
-                    lineCount++;
-                })
-                .execute('topic 123');
-
-            lineCount.should.equal(1);
-        });
-
-        it('should prompt user for value if user supplies option with no value and prompt is enabled for that option.', function () {
-            var context = {},
-                lineCount = 0;
-
-            shell
-                .setContextStorage(context)
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', '[topic 123 content]');
-                    lineCount++;
-                })
-                .execute('topic 123');
-
-            lineCount.should.equal(1);
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'Enter your reply.');
-                    lineCount++;
-                })
-                .execute('-r');
-
-            lineCount.should.equal(2);
-        });
-
-        it('should clear the context when clear command is issued.', function () {
+        it ('should reset if shell.clearDisplay(true) is called.', function () {
             var context = {};
 
             shell
-                .setContextStorage(context)
-                .execute('topic 123');
+                .onContextSave(function (updatedContext) {
+                    context = updatedContext;
+                })
+                .execute('login', context);
 
             should.exist(context);
-            context.should.have.property('passive').with.property('cmdStr', 'topic 123');
+            context.should.have.property('prompt').with.property('cmd', 'login');
 
-            shell.execute('clear');
+            shell.clearDisplay(true);
 
             should.exist(context);
-            context.should.not.have.property('passive');
+            context.should.not.have.property('prompt');
         });
 
     });

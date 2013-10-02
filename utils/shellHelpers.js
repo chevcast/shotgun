@@ -1,7 +1,12 @@
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    context = {};
 
-module.exports = exports = function (shell) {
+exports.updateContext = function (newContext) {
+    context = newContext;
+};
+
+exports.registerShellMethods = function (shell) {
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function(cmdPath) {
         try {
@@ -38,7 +43,7 @@ module.exports = exports = function (shell) {
     };
 
     // Default helper functions.
-    shell.send = shell.contextChanged = function () {
+    var saveContext = shell.send = function () {
         return shell;
     };
 
@@ -52,7 +57,8 @@ module.exports = exports = function (shell) {
     };
 
     // Clear display helper function.
-    shell.clearDisplay = function () {
+    shell.clearDisplay = function (resetContext) {
+        if (resetContext) shell.resetContext();
         return shell.send({ clearDisplay: true });
     };
 
@@ -86,8 +92,6 @@ module.exports = exports = function (shell) {
         });
     };
     shell.error = function (text, options) {
-        if (shell.settings.debug)
-            console.error(text);
         return shell.send({
             line: {
                 options: options || {},
@@ -106,41 +110,43 @@ module.exports = exports = function (shell) {
         });
     };
 
-    shell.onContextChanged = function (callback) {
-        shell.contextChanged = function () {
-            callback(shell.context);
+    shell.onContextSave = function (callback) {
+        saveContext = function () {
+            callback(context);
             return shell;
         };
         return shell;
     };
-    shell.setContextStorage = function (newContext) {
-        shell.context = newContext;
-        return shell.contextChanged();
+    shell.setVar = function (key, value) {
+        context[key] = value;
+        return saveContext();
     };
-    shell.setPassive = function (cmdStr, msg) {
-        shell.context.passive = {
-            cmdStr: cmdStr,
-            msg: msg || cmdStr
-        };
-        return shell.contextChanged();
+    shell.getVar = function (key) {
+        return context[key];
+    };
+    shell.delVar = function (key) {
+        if (!context.hasOwnProperty(key))
+            return;
+        delete context[key];
+        return saveContext();
     };
     shell.setPrompt = function(key, cmdName, options, msg) {
-        shell.context.prompt = {
+        context.prompt = {
             option: key,
             cmd: cmdName,
             options: options,
             msg: msg || key
         };
-        return shell.contextChanged();
+        return saveContext();
     };
     shell.clearPrompt = function () {
-        if (shell.context.hasOwnProperty('prompt'))
-            delete shell.context.prompt;
-        return shell.contextChanged();
+        if (!context.hasOwnProperty('prompt'))
+            return
+        delete context.prompt;
+        return saveContext();
     };
-    shell.clearPassive = function () {
-        if (shell.context.hasOwnProperty('passive'))
-            delete shell.context.passive;
-        return shell.contextChanged();
-    };
+    shell.resetContext = function() {
+        context = {};
+        return saveContext();
+    }
 };

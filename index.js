@@ -1,5 +1,5 @@
 var extend = require('extend'),
-    registerHelperMethods = require('./utils/helperMethods'),
+    shellHelpers = require('./utils/shellHelpers'),
     loadCommandModules = require('./utils/loadCommandModules'),
     execute = require('./utils/execute'),
     settings = require('./settings');
@@ -23,11 +23,8 @@ module.exports.Shell = function (options) {
     // This property will store all the available command modules.
     shell.cmds = {};
 
-    // Instantiate a blank context object.
-    shell.context = {};
-
     // Initialize shell helper methods.
-    registerHelperMethods(shell);
+    shellHelpers.registerShellMethods(shell);
 
     // Initialize command modules.
     loadCommandModules(shell);

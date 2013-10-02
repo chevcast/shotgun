@@ -1,5 +1,5 @@
 exports.description = 'Exits the application.';
 
-exports.invoke = function (options, shell) {
+exports.invoke = function (shell) {
     shell.exit();
 };

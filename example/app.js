@@ -8,16 +8,10 @@ var rl = readline.createInterface(process.stdin, process.stdout);
 
 // Configure shotgun.
 shell
-    // Set the object that shotgun should use to maintain context information.
-    .setContextStorage(context)
-    // This callback is fired every time the context object is modified.
-    .onContextChanged(function (context) {
-        if (context.passive)
-            // Set prompt text in console window to show context info.
-            rl.setPrompt(context.passive.msg + " > ");
-        else
-            // Reset prompt text back to just >
-            rl.setPrompt("> ");
+    // Pass in a callback to be invoked when the context needs to be saved.
+    .onContextSave(function (contextToSave) {
+        context = contextToSave;
+        rl.setPrompt("> ");
     })
     // This callback is fired every time shotgun sends data back to your application.
     .onData(function (data) {
@@ -34,7 +28,7 @@ shell
 
 // Execute shotgun every time a line of text comes through the prompt.
 rl.on('line', function (userInput) {
-    shell.execute(userInput);
+    shell.execute(userInput, context);
     rl.prompt();
 });
 

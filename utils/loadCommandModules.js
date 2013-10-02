@@ -7,7 +7,7 @@ module.exports = exports = function (shell) {
 
     // Load default command modules.
     for (var key in shell.settings.defaultCmds) {
-        if (shell.settings.defaultCmds[key])
+        if (shell.settings.defaultCmds[key] && !shell.cmds.hasOwnProperty(key))
             shell.loadCommandModule(path.resolve(__dirname, '..', 'default_cmds', key + '.js'));
     }
 
