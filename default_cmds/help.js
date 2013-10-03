@@ -59,15 +59,16 @@ exports.invoke = function (shell, options) {
             shell.error(options.command + ' is not a valid command name.');
         else {
 
+            var firstLine = options.command;
+            // If a "usage key" is specified then display it.
+            if (cmd.usage)
+                firstLine += ' ' + cmd.usage;
+            shell.log(firstLine, { bold: true });
+            shell.log();
+
             // Display the command's description if it has one.
             if (cmd.description) {
                 shell.log(cmd.description);
-                shell.log();
-            }
-
-            // If a "usage key" is specified then display it.
-            if (cmd.usage) {
-                shell.log('Usage: "' + options.command + ' ' + cmd.usage + '"');
                 shell.log();
             }
 
