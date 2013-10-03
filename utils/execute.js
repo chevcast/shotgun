@@ -35,7 +35,7 @@ module.exports = exports = function (cmdStr, context, options) {
         // ...otherwise remove the command name from the args array and build our options object.
         else {
             args.splice(0, 1);
-            options = extend(optimist(args).argv, options);
+            options = extend({}, optimist(args).argv, options);
         }
 
         // Get reference to the command module by name.
