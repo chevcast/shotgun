@@ -43,7 +43,7 @@ exports.invoke = function (shell, options) {
             // If the command is not hidden then add the line.
             // If there are 5 commands or less then type the lines character by character.
             // If there are more than 5 commands then do not type them out as it takes too long and the effect isn't worth the wait.
-            if (!cmd.hidden)
+            if (!cmd.hidden) {
                 var lineOptions = { dontType: cmdNames.length > 5 };
                 if (!(index % 2)) lineOptions.inverted = true;
                 shell.log(helpStr, lineOptions);
