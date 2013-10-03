@@ -131,20 +131,15 @@ exports.registerShellMethods = function (shell) {
         return saveContext();
     };
     shell.setPrompt = function(key, cmdName, options, msg) {
-        context.prompt = {
+        var prompt = {
             option: key,
             cmd: cmdName,
             options: options,
             msg: msg || key
         };
-        return saveContext();
+        return shell.setVar('prompt', prompt);
     };
-    shell.clearPrompt = function () {
-        if (!context.hasOwnProperty('prompt'))
-            return
-        delete context.prompt;
-        return saveContext();
-    };
+    shell.clearPrompt = shell.delVar.bind(shell, 'prompt');
     shell.resetContext = function() {
         context = {};
         return saveContext();
