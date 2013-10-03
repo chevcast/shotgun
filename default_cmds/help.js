@@ -31,6 +31,7 @@ exports.invoke = function (shell, options) {
         }
 
         // Iterate over all command modules and add a line of text with the command name and description.
+        var inverted = false;
         for (var index = 0; index < cmdNames.length; index++) {
             var cmdName = cmdNames[index],
                 cmd = shell.cmds[cmdName],
@@ -44,8 +45,8 @@ exports.invoke = function (shell, options) {
             // If there are 5 commands or less then type the lines character by character.
             // If there are more than 5 commands then do not type them out as it takes too long and the effect isn't worth the wait.
             if (!cmd.hidden) {
-                var lineOptions = { dontType: cmdNames.length > 5 };
-                if (!(index % 2)) lineOptions.inverted = true;
+                var lineOptions = { dontType: cmdNames.length > 5, inverted: inverted };
+                inverted = !inverted;
                 shell.log(helpStr, lineOptions);
             }
         }
