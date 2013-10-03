@@ -5,14 +5,12 @@ var validateCommandOptions = require('./validateCommandOptions'),
     shellHelpers = require('./shellHelpers');
 
 module.exports = exports = function (cmdStr, context, options) {
-    var shell = this,
-        prompt = false;
+    var shell = this;
 
     // Initialize shell helper methods.
-    if (context) {
-        shellHelpers.updateContext(context);
-        prompt = shell.getVar('prompt');
-    }
+    if (context) shellHelpers.updateContext(context);
+
+    var prompt = shell.getVar('prompt');
 
     // If no command string was supplied then write an error message.
     if (!cmdStr || /^\s*$/.test(cmdStr))
@@ -37,7 +35,7 @@ module.exports = exports = function (cmdStr, context, options) {
         // ...otherwise remove the command name from the args array and build our options object.
         else {
             args.splice(0, 1);
-            options = extend(optimist(args).argv, options);
+            options = extend({}, optimist(args).argv, options);
         }
 
         // Get reference to the command module by name.
