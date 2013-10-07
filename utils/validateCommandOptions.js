@@ -26,6 +26,18 @@ module.exports = exports = function (options, cmd, shell) {
                 });
             }
 
+            // If option has default value and was not found in supplied options then assign it.
+            if (definedOption.default && !options.hasOwnProperty(key)) {
+                switch (typeof(definedOption.default)) {
+                    case 'string':
+                        options[key] = definedOption.default;
+                        break;
+                    case 'function':
+                        options[key] = definedOption.default(shell, options);
+                        break;
+                }
+            }
+
             // Prompt the user for value if:
             // A) The option was not supplied and it is required or
             // B) the option was supplied but without a value.
@@ -40,18 +52,6 @@ module.exports = exports = function (options, cmd, shell) {
                         shell.log('Enter value for ' + key + '.');
                     // Return immediately without further validation.
                     return false;
-                }
-            }
-
-            // If option has default value and was not found in supplied options then assign it.
-            if (definedOption.default && !options.hasOwnProperty(key)) {
-                switch (typeof(definedOption.default)) {
-                    case 'string':
-                        options[key] = definedOption.default;
-                        break;
-                    case 'function':
-                        options[key] = definedOption.default(shell, options);
-                        break;
                 }
             }
 
