@@ -44,8 +44,16 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If option has default value and was not found in supplied options then assign it.
-            if (definedOption.default && !options.hasOwnProperty(key))
-                options[key] = definedOption.default;
+            if (definedOption.default && !options.hasOwnProperty(key)) {
+                switch (typeof(definedOption.default)) {
+                    case 'string':
+                        options[key] = definedOption.default;
+                        break;
+                    case 'function':
+                        options[key] = definedOption.default(shell, options);
+                        break;
+                }
+            }
 
             // If defined option has a validate expression or function and the option was supplied then
             // validate the supplied option against the expression or function.
