@@ -109,6 +109,9 @@ exports.registerShellMethods = function (shell) {
             }
         });
     };
+    shell.edit = function (text) {
+        return shell.send({ edit: text });
+    };
 
     shell.onContextSave = function (callback) {
         saveContext = function () {
