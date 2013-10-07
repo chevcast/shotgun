@@ -64,7 +64,7 @@ module.exports = exports = function (options, cmd, shell) {
                     try {
                         // If the validation function returns false then do not invoke the command and write
                         // error message.
-                        var validationResult = definedOption.validate(options[key], options, shell);
+                        var validationResult = definedOption.validate(options[key], shell, options);
                         if (validationResult !== true) {
                             if (typeof(validationResult) !== 'string')
                                 shell.error('invalid value for "' + key + '"');
