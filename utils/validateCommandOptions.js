@@ -11,13 +11,13 @@ module.exports = exports = function (options, cmd, shell) {
             var definedOption = cmd.options[key];
 
             // If option has named=false, attach non-named parameters as option and remove from `options._` array.
-            if (!(key in options) && definedOption.noName && options._.length > 0) {
+            if (!options.hasOwnProperty(key) && definedOption.noName && options._.length > 0) {
                 options[key] = options._[nonNamedIndex];
                 options._.splice(nonNamedIndex, 1);
             }
 
             // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
-            if (!definedOption.noName && !(key in options) && definedOption.aliases) {
+            if (!definedOption.noName && !options.hasOwnProperty(key) && definedOption.aliases) {
                 definedOption.aliases.forEach(function (alias) {
                     if (alias in options) {
                         options[key] = options[alias];
@@ -30,7 +30,7 @@ module.exports = exports = function (options, cmd, shell) {
             // A) The option was not supplied and it is required or
             // B) the option was supplied but without a value.
             if (definedOption.prompt) {
-                if ((!(key in options) && definedOption.required) || (key in options && options[key] === true)) {
+                if ((!options.hasOwnProperty(key) && definedOption.required) || (options.hasOwnProperty(key) && options[key] === true)) {
                     shell.setPrompt(key, cmd.name, options);
                     if (definedOption.password)
                         shell.password();
@@ -44,12 +44,12 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If option has default value and was not found in supplied options then assign it.
-            if (definedOption.default && !(key in options))
+            if (definedOption.default && !options.hasOwnProperty(key))
                 options[key] = definedOption.default;
 
             // If defined option has a validate expression or function and the option was supplied then
             // validate the supplied option against the expression or function.
-            if (definedOption.validate && (key in options)) {
+            if (definedOption.validate && options.hasOwnProperty(key)) {
 
                 // If defined validation is a regular expression then validate the supplied value against it.
                 if (definedOption.validate instanceof RegExp) {
@@ -83,7 +83,7 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If option is required but is not found in supplied options then error.
-            if (definedOption.required && !(key in options)) {
+            if (definedOption.required && !options.hasOwnProperty(key)) {
                 shell.error('missing parameter "' + key + '"');
                 return false;
             }
