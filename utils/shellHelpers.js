@@ -17,6 +17,12 @@ exports.registerShellMethods = function (shell) {
                     var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
                     if (cmd && cmd.invoke) {
                         cmd.name = cmdName.toLowerCase();
+                        if (!cmd.access)
+                            cmd.access = function () { return true; };
+                        else if (typeof(cmd.access) === 'boolean') {
+                            var access = cmd.access;
+                            cmd.access = function () { return access; };
+                        }
                         shell.cmds[cmdName] = cmd;
                     }
                     else if (shell.settings.debug)

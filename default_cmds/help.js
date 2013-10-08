@@ -13,9 +13,11 @@ exports.invoke = function (shell, options) {
     var cmdNames = [];
 
     // Populate cmdNames with all command module names and sort the array alphabetically.
-    for (var key in shell.cmds)
-        if (shell.cmds.hasOwnProperty(key) && shell.settings.canAccessCmd(key))
+    for (var key in shell.cmds) {
+        var cmd = shell.cmds[key];
+        if (cmd && cmd.access(shell, options))
             cmdNames.push(key);
+    }
     cmdNames.sort();
 
     shell.log();
