@@ -41,7 +41,7 @@ module.exports = exports = function (cmdStr, context, options) {
         // Get reference to the command module by name.
         var cmd = shell.cmds[cmdName.toLowerCase()];
         // If the command module exists then process it's options and invoke the module.
-        if (cmd && cmd.access(shell, options)) {
+        if (cmd && cmd.access(shell, cmdName)) {
             if (options.hasOwnProperty('?') || options.hasOwnProperty('help'))
                 shell.execute('help', context, { command: cmdName });
             else if (validateCommandOptions(options, cmd, shell))
