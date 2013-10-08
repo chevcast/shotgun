@@ -27,13 +27,14 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If option has default value and was not found in supplied options then assign it.
-            if (definedOption.default && !options.hasOwnProperty(key)) {
+            var defaultValue;
+            if (definedOption.hasOwnProperty('default') && !options.hasOwnProperty(key)) {
                 switch (typeof(definedOption.default)) {
                     case 'string':
-                        options[key] = definedOption.default;
+                        options[key] = defaultValue = definedOption.default;
                         break;
                     case 'function':
-                        options[key] = definedOption.default(shell, options);
+                        options[key] = defaultValue = definedOption.default(shell, options);
                         break;
                 }
             }
@@ -42,7 +43,10 @@ module.exports = exports = function (options, cmd, shell) {
             // A) The option was not supplied and it is required or
             // B) the option was supplied but without a value.
             if (definedOption.prompt) {
-                if ((!options.hasOwnProperty(key) && definedOption.required) || (options.hasOwnProperty(key) && options[key] === true)) {
+                if ((!options.hasOwnProperty(key) && definedOption.required)
+                        || (options.hasOwnProperty(key) && options[key] === true)
+                        || typeof(defaultValue) === 'undefined'
+                        || defaultValue === null) {
                     shell.setPrompt(key, cmd.name, options);
                     if (definedOption.password)
                         shell.password();
