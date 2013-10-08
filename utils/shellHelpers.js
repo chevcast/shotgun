@@ -18,7 +18,7 @@ exports.registerShellMethods = function (shell) {
                     if (cmd && cmd.invoke) {
                         cmd.name = cmdName.toLowerCase();
                         if (typeof(cmd.access) === 'undefined')
-                            cmd.access = shell.settings.canAccessCmd || function () { return true; };
+                            cmd.access = shell.settings.canAccessCmd;
                         else if (typeof(cmd.access) === 'boolean') {
                             var access = cmd.access;
                             cmd.access = function () { return access; };

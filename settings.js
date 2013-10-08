@@ -7,5 +7,7 @@ module.exports = exports = {
         exit: true
     },
     loadNpmCmds: true,
-    debug: false
+    debug: false,
+    // By default all command modules are accessible.
+    canAccessCmd: function () { return true; }
 };
