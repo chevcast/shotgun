@@ -17,13 +17,14 @@ exports.registerShellMethods = function (shell) {
                     var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
                     if (cmd && cmd.invoke) {
                         cmd.name = cmdName.toLowerCase();
-                        if (typeof(cmd.access) === 'undefined')
+                        if (typeof(cmd.access) === 'undefined') {
                             if (typeof(shell.settings.defaultCmdAccess) === 'boolean') {
                                 var defaultCmdAccess = shell.settings.defaultCmdAccess;
                                 cmd.access = function () { return defaultCmdAccess; };
                             }
                             else
                                 cmd.access = shell.settings.defaultCmdAccess;
+                        }
                         else if (typeof(cmd.access) === 'boolean') {
                             var access = cmd.access;
                             cmd.access = function () { return access; };
