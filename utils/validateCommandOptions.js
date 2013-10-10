@@ -17,8 +17,11 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
-            if (!definedOption.noName && !options.hasOwnProperty(key) && definedOption.aliases) {
-                definedOption.aliases.forEach(function (alias) {
+            if (!definedOption.hasOwnProperty('noName') && !options.hasOwnProperty(key) && definedOption.hasOwnProperty('aliases')) {
+                var aliases = definedOption.aliases;
+                if (typeof(aliases) === 'string')
+                    aliases = aliases.toString().replace(/, /, ',').split(',').unique();
+                aliases.forEach(function (alias) {
                     if (alias in options) {
                         options[key] = options[alias];
                         delete options[alias];
@@ -29,11 +32,11 @@ module.exports = exports = function (options, cmd, shell) {
             // If option has default value and was not found in supplied options then assign it.
             if (definedOption.hasOwnProperty('default') && !options.hasOwnProperty(key)) {
                 switch (typeof(definedOption.default)) {
-                    case 'string':
-                        options[key] = definedOption.default;
-                        break;
                     case 'function':
                         options[key] = definedOption.default(shell, options);
+                        break;
+                    default:
+                        options[key] = definedOption.default;
                         break;
                 }
             }
@@ -41,7 +44,7 @@ module.exports = exports = function (options, cmd, shell) {
             // If prompt is enabled then prompt the user for a value if:
             // A) The option was not supplied and it is required or
             // B) the option was supplied but without a value.
-            if (definedOption.prompt) {
+            if (definedOption.hasOwnProperty('prompt')) {
                 if (!options.hasOwnProperty(key) && definedOption.required
                     || options.hasOwnProperty(key) && options[key] === true) {
                     shell.setPrompt(key, cmd.name, options);
@@ -58,7 +61,7 @@ module.exports = exports = function (options, cmd, shell) {
 
             // If defined option has a validate expression or function and the option was supplied then
             // validate the supplied option against the expression or function.
-            if (definedOption.validate && options.hasOwnProperty(key)) {
+            if (definedOption.hasOwnProperty('validate') && options.hasOwnProperty(key)) {
 
                 // If defined validation is a regular expression then validate the supplied value against it.
                 if (definedOption.validate instanceof RegExp) {
@@ -92,10 +95,13 @@ module.exports = exports = function (options, cmd, shell) {
             }
 
             // If option is required but is not found in supplied options then error.
-            if (definedOption.required && !options.hasOwnProperty(key)) {
+            if (definedOption.hasOwnProperty('required') && !options.hasOwnProperty(key)) {
                 shell.error('missing parameter "' + key + '"');
                 return false;
             }
+
+            // Hook for additional defined options logic that can be passed in.
+            if (shell.settings.parseOptions) shell.settings.parseOptions(definedOption, options, cmd, shell);
         }
     }
     // If we made it this far then all options are valid so return true.

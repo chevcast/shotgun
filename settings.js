@@ -9,5 +9,7 @@ module.exports = exports = {
     loadNpmCmds: true,
     debug: false,
     // By default all command modules are accessible.
-    defaultCmdAccess: true
+    defaultCmdAccess: true,
+    // Optional function for parsing command options.
+    parseOptions: false
 };
