@@ -11,7 +11,7 @@ module.exports = exports = function (options, cmd, shell) {
             var definedOption = cmd.options[key];
 
             // Hook for additional defined options logic that can be passed in.
-            if (shell.settings.parseOptions) shell.settings.parseOptions(key, definedOptions, options, cmd, shell);
+            if (shell.settings.parseOptions) shell.settings.parseOptions(key, options, cmd, shell);
 
             // If noName:false, attach non-named parameters as option and remove from `options._` array.
             if (!options.hasOwnProperty(key) && definedOption.noName && options._.length > 0) {
