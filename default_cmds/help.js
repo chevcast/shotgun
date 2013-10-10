@@ -97,7 +97,7 @@ exports.invoke = function (shell, options) {
                 if (strs.length > 0) {
                     shell.log('Options:');
                     shell.log();
-                    for (var index in strs) {
+                    for (var index = 0; index < strs.length; index++) {
                         var option = strs[index].option,
                             optionStr = strs[index].str;
                         if (option.description) {
