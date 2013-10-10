@@ -10,14 +10,18 @@ module.exports = exports = function (options, cmd, shell) {
             // The option defined by the command.
             var definedOption = cmd.options[key];
 
-            // If option has named=false, attach non-named parameters as option and remove from `options._` array.
+            // Hook for additional defined options logic that can be passed in.
+            if (shell.settings.parseOptions) shell.settings.parseOptions(definedOption, options, cmd, shell);
+
+            // If noName:false, attach non-named parameters as option and remove from `options._` array.
             if (!options.hasOwnProperty(key) && definedOption.noName && options._.length > 0) {
                 options[key] = options._[nonNamedIndex];
                 options._.splice(nonNamedIndex, 1);
             }
 
             // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
-            if (!definedOption.hasOwnProperty('noName') && !options.hasOwnProperty(key) && definedOption.hasOwnProperty('aliases')) {
+            if (!definedOption.hasOwnProperty('noName') && !options.hasOwnProperty(key)
+                && definedOption.hasOwnProperty('aliases')) {
                 var aliases = definedOption.aliases;
                 if (typeof(aliases) === 'string')
                     aliases = aliases.toString().replace(/, /, ',').split(',').unique();
@@ -45,7 +49,7 @@ module.exports = exports = function (options, cmd, shell) {
             // A) The option was not supplied and it is required or
             // B) the option was supplied but without a value.
             if (definedOption.hasOwnProperty('prompt')) {
-                if (!options.hasOwnProperty(key) && definedOption.required
+                if (!options.hasOwnProperty(key)&& definedOption.required
                     || options.hasOwnProperty(key) && options[key] === true) {
                     shell.setPrompt(key, cmd.name, options);
                     if (definedOption.password)
@@ -99,9 +103,6 @@ module.exports = exports = function (options, cmd, shell) {
                 shell.error('missing parameter "' + key + '"');
                 return false;
             }
-
-            // Hook for additional defined options logic that can be passed in.
-            if (shell.settings.parseOptions) shell.settings.parseOptions(definedOption, options, cmd, shell);
         }
     }
     // If we made it this far then all options are valid so return true.
