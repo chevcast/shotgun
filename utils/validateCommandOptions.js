@@ -21,7 +21,7 @@ module.exports = exports = function (options, cmd, shell) {
                 && definedOption.hasOwnProperty('aliases')) {
                 var aliases = definedOption.aliases;
                 if (typeof(aliases) === 'string')
-                    aliases = aliases.toString().replace(/, /, ',').split(',').unique();
+                    aliases = aliases.toString().replace(/, /, ',').split(',');
                 aliases.forEach(function (alias) {
                     if (alias in options) {
                         options[key] = options[alias];
