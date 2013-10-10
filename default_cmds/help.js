@@ -83,7 +83,10 @@ exports.invoke = function (shell, options) {
                     if (!option.hidden) {
                         var optionStr = (key.length > 1 ? '--' : '-') + key;
                         if (option.aliases) {
-                            option.aliases.forEach(function (alias) {
+                            var aliases = option.aliases;
+                            if (typeof(aliases) === 'string')
+                                aliases = aliases.toString().replace(/, /, ',').split(',').unique();
+                            aliases.forEach(function (alias) {
                                 optionStr += ',' + (alias.length > 1 ? '--' : '-') + alias;
                             });
                         }
