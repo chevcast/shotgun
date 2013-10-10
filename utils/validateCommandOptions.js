@@ -10,9 +10,6 @@ module.exports = exports = function (options, cmd, shell) {
             // The option defined by the command.
             var definedOption = cmd.options[key];
 
-            // Hook for additional defined options logic that can be passed in.
-            if (shell.settings.parseOptions) shell.settings.parseOptions(key, options, cmd, shell);
-
             // If noName:false, attach non-named parameters as option and remove from `options._` array.
             if (!options.hasOwnProperty(key) && definedOption.noName && options._.length > 0) {
                 options[key] = options._[nonNamedIndex];
@@ -32,6 +29,9 @@ module.exports = exports = function (options, cmd, shell) {
                     }
                 });
             }
+
+            // Hook for additional defined options logic that can be passed in.
+            if (shell.settings.parseOptions) shell.settings.parseOptions(key, options, cmd, shell);
 
             // If option has default value and was not found in supplied options then assign it.
             if (definedOption.hasOwnProperty('default') && !options.hasOwnProperty(key)) {
