@@ -16,7 +16,10 @@ exports.registerShellMethods = function (shell) {
                     var cmd = require(cmdPath);
                     var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
                     if (cmd && cmd.invoke) {
-                        cmd.name = cmdName.toLowerCase();
+                        if (!cmd.hasOwnProperty('name'))
+                            cmd.name = cmdName.toLowerCase();
+                        else
+                            cmdName = cmd.name;
                         if (typeof(cmd.access) === 'undefined') {
                             if (typeof(shell.settings.defaultCmdAccess) === 'boolean') {
                                 var defaultCmdAccess = shell.settings.defaultCmdAccess;
