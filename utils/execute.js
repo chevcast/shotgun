@@ -13,8 +13,8 @@ module.exports = exports = function (cmdStr, context, options) {
     var prompt = shell.getVar('prompt');
 
     // If no command string was supplied then write an error message.
-    if (!cmdStr || /^[\s';"\[\]|&()<>]+$/.test(cmdStr))
-        return shell.error('You must supply a value.');
+    if (!cmdStr || /^[\s';"\[\]|&<>]+$|[()]/.test(cmdStr))
+        return shell.error('Invalid input.');
 
     // Parse the command string into an argument array and set the command name to the first item.
     var args = cmdStr,
