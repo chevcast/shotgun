@@ -1,11 +1,19 @@
 var validateCommandOptions = require('./validateCommandOptions'),
     shellQuote = require('shell-quote'),
-    optimist = require('optimist'),
     extend = require('extend'),
     shellHelpers = require('./shellHelpers');
 
 module.exports = exports = function (cmdStr, context, options) {
-    var shell = this;
+
+    // Remove optimist from the module cache so it won't remember options we defined during last execution.
+    for (var key in require.cache)
+        if (key.match(/optimist\\index\.js$/))
+            delete require.cache[key];
+
+    var shell = this,
+        optimist = require('optimist'); // Get fresh reference to optimist with every execution.
+
+    // Todo: Modify optimist with a clearOptions function. When pull request is accepted put the require back at the top and remove the code to invalidate the cache.
 
     // Initialize shell helper methods.
     if (context) shellHelpers.updateContext(context);
@@ -32,14 +40,37 @@ module.exports = exports = function (cmdStr, context, options) {
             options[prompt.option] = cmdStr;
             shell.clearPrompt();
         }
-        // ...otherwise remove the command name from the args array and build our options object.
-        else {
-            args.splice(0, 1);
-            options = extend({}, optimist(args).argv, options);
-        }
 
         // Get reference to the command module by name.
         var cmd = shell.cmds[cmdName.toLowerCase()];
+
+        // ...otherwise remove the command name from the args array and build our options object.
+        if (!prompt) {
+            args.splice(0, 1);
+            // Configure optimist based on defined command options.
+            if (cmd.hasOwnProperty('options')) {
+                for (var key in cmd.options) {
+                    if (cmd.options.hasOwnProperty(key)) {
+                        var option = cmd.options[key];
+                        if (option.hasOwnProperty('type'))
+                            switch(option.type.toLowerCase()) {
+                                case "string":
+                                    optimist.string(key);
+                                    if (option.hasOwnProperty('aliases'))
+                                        optimist.string(option.aliases);
+                                    break;
+                                case "boolean":
+                                    optimist.boolean(key);
+                                    if (option.hasOwnProperty('aliases'))
+                                        optimist.boolean(option.aliases);
+                            }
+                    }
+                }
+            }
+            // Set options by extending the parsed user options with the manually supplied options.
+            options = extend({}, optimist.parse(args), options);
+        }
+
         // If the command module exists then process it's options and invoke the module.
         if (cmd && cmd.access(shell, cmdName.toLowerCase())) {
             if (options.hasOwnProperty('?') || options.hasOwnProperty('help'))

@@ -20,6 +20,13 @@ exports.registerShellMethods = function (shell) {
                             cmd.name = cmdName.toLowerCase();
                         else
                             cmdName = cmd.name;
+                        if (cmd.hasOwnProperty('options')) {
+                            if (cmd.options.hasOwnProperty('aliases')) {
+                                var aliases = cmd.options.aliases;
+                                if (typeof(aliases) === 'string')
+                                    aliases = aliases.toString().replace(/, /, ',').split(',');
+                            }
+                        }
                         if (typeof(cmd.access) === 'undefined') {
                             if (typeof(shell.settings.defaultCmdAccess) === 'boolean') {
                                 var defaultCmdAccess = shell.settings.defaultCmdAccess;

@@ -7,14 +7,16 @@ exports.options = {
         noName: true,
         required: true,
         description: 'The message to be displayed.',
-        hidden: true
+        hidden: true,
+        type: 'string'
     },
     iterations: {
         aliases: ['i'],
         required: true,
         default: 1,
         description: 'The number of times to display the message.',
-        validate: /^\d+$/
+        validate: /^\d+$/,
+        type: 'number'
     }
 };
 

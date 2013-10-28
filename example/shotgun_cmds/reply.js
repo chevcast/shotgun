@@ -7,7 +7,8 @@ exports.options = {
         required: true,
         prompt: "Enter your reply.",
         noName: true,
-        hidden: true
+        hidden: true,
+        type: 'string'
     }
 };
 

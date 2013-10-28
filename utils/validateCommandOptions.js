@@ -19,10 +19,7 @@ module.exports = exports = function (options, cmd, shell) {
             // If defined option was not supplied and it has aliases, check if aliases were supplied and attach option.
             if (!definedOption.hasOwnProperty('noName') && !options.hasOwnProperty(key)
                 && definedOption.hasOwnProperty('aliases')) {
-                var aliases = definedOption.aliases;
-                if (typeof(aliases) === 'string')
-                    aliases = aliases.toString().replace(/, /, ',').split(',');
-                aliases.forEach(function (alias) {
+                definedOption.aliases.forEach(function (alias) {
                     if (alias in options) {
                         options[key] = options[alias];
                         delete options[alias];

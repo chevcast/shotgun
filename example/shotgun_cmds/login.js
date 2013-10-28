@@ -13,6 +13,7 @@ exports.options = {
             usernameValid = username.toLowerCase() === 'charlie';
             return true;
         },
+        type: 'string',
         hidden: true
     },
     password: {
@@ -24,6 +25,7 @@ exports.options = {
                 return "Invalid password.";
             return true;
         },
+        type: 'string',
         hidden: true,
         password: true
     }

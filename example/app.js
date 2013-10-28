@@ -1,6 +1,6 @@
 var readline = require('readline'),
     shotgun = require('../index'),
-    shell = new shotgun.Shell({ debug: true, parseOptions: console.log }),
+    shell = new shotgun.Shell({ debug: true }),
     context = {};
 
 // Create console readline interface.

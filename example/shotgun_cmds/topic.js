@@ -6,7 +6,8 @@ exports.options = {
     id: {
         noName: true,
         required: true,
-        description: 'The ID of the desired topic.'
+        description: 'The ID of the desired topic.',
+        type: 'number'
     }
 };
 
