@@ -13,7 +13,7 @@ module.exports = exports = function (cmdStr, context, options) {
     var shell = this,
         optimist = require('optimist'); // Get fresh reference to optimist with every execution.
 
-    // Todo: Modify optimist with a clearOptions function. When pull request is accepted put the require back at the top and remove the code to invalidate the cache.
+    // Todo: Modify optimist with a clearOptions function. When pull request is accepted put the require back at the top and remove the code to invalidate the cache. Then make a call to the new optimist function instead.
 
     // Initialize shell helper methods.
     if (context) shellHelpers.updateContext(context);
