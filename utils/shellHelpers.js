@@ -21,10 +21,15 @@ exports.registerShellMethods = function (shell) {
                         else
                             cmdName = cmd.name;
                         if (cmd.hasOwnProperty('options')) {
-                            if (cmd.options.hasOwnProperty('aliases')) {
-                                var aliases = cmd.options.aliases;
-                                if (typeof(aliases) === 'string')
-                                    aliases = aliases.toString().replace(/, /, ',').split(',');
+                            for (var key in cmd.options) {
+                                if (cmd.options.hasOwnProperty(key)) {
+                                    var definedOption = cmd.options[key];
+                                    if (definedOption.hasOwnProperty('aliases')) {
+                                        var aliases = cmd.options.aliases;
+                                        if (typeof(aliases) === 'string')
+                                            aliases = aliases.toString().replace(/, /, ',').split(',');
+                                    }
+                                }
                             }
                         }
                         if (typeof(cmd.access) === 'undefined') {
