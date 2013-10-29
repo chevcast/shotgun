@@ -24,11 +24,9 @@ exports.registerShellMethods = function (shell) {
                             for (var key in cmd.options) {
                                 if (cmd.options.hasOwnProperty(key)) {
                                     var definedOption = cmd.options[key];
-                                    if (definedOption.hasOwnProperty('aliases')) {
-                                        var aliases = cmd.options.aliases;
-                                        if (typeof(aliases) === 'string')
-                                            aliases = aliases.toString().replace(/, /, ',').split(',');
-                                    }
+                                    if (definedOption.hasOwnProperty('aliases'))
+                                        if (typeof(definedOption.aliases) === 'string')
+                                            definedOption.aliases = definedOption.aliases.toString().replace(/, /, ',').split(',');
                                 }
                             }
                         }
