@@ -48,7 +48,7 @@ module.exports = exports = function (cmdStr, context, options) {
         if (!prompt) {
             args.splice(0, 1);
             // Configure optimist based on defined command options.
-            if (cmd.hasOwnProperty('options')) {
+            if (cmd && cmd.hasOwnProperty('options')) {
                 for (var key in cmd.options) {
                     if (cmd.options.hasOwnProperty(key)) {
                         var option = cmd.options[key];
