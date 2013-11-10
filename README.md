@@ -1,6 +1,6 @@
 # shotgun
 
-[![Build Status](https://travis-ci.org/Chevex/shotgun.png)](https://travis-ci.org/Chevex/shotgun)
+[![Build Status](https://travis-ci.org/chevex/shotgun.png)](https://travis-ci.org/chevex/shotgun)
 [![Dependencies Status](https://gemnasium.com/Chevex/shotgun.png)](https://gemnasium.com/Chevex/shotgun)
 [![NPM version](https://badge.fury.io/js/shotgun.png)](http://badge.fury.io/js/shotgun)
 
