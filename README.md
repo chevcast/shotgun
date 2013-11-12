@@ -6,8 +6,6 @@
 
 > Shotgun is a UI agnostic command shell. It allows you to quickly and easily write commands and plug them into the shell framework. Unlike most other options modules or command line tools, shotgun does not make any assumptions about the UI. Shotgun could be used as a plain console application or you can combine shotgun with [shotgun-client](https://github.com/chevex/shotgun-client) to make terminals on the web!
 
-[Looking for shotgun-client instead?](https://github.com/chevex/shotgun-client)
-
 ![](http://i.imgur.com/zUsgxFW.gif)
 
 - [Documentation](https://github.com/chevex/shotgun/wiki)
