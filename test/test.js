@@ -16,179 +16,113 @@ describe('Shotgun', function () {
 
     describe('shell', function () {
 
-        it('should send clearDisplay:true when clear command is run.', function () {
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('clearDisplay', true);
-                })
-                .execute('clear');
+        it('should emit a clear event when clear command is run. [test 1]', function (done) {
+            shell.on('clear', done).execute('clear');
         });
 
-        it('should send exit:true when exit command is run.', function () {
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('exit', true);
-                })
-                .execute('exit');
+        it('should emit an exit event when exit command is run.', function (done) {
+            shell.on('exit', done).execute('exit');
         });
 
-        it('should understand command line options passed by the user.', function () {
+        it('should understand command line options passed by the user. [test 2]', function (done) {
             var lineCount = 0;
 
             shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'she sells sea shells down by the seashore');
+                .on('log', function (text, options) {
+                    should.exist(text);
+                    should.exist(options);
+                    options.should.have.property('type', 'log');
+                    text.should.equal('she sells sea shells down by the seashore');
+
                     lineCount++;
+                    if (lineCount === 5) done();
                 })
                 .execute('echo "she sells sea shells down by the seashore" -i 5');
-
-            lineCount.should.equal(5);
         });
 
-        it('should override user supplied options if options are passed in manually.', function () {
+        it('should override user supplied options if options are passed in manually. [test 3]', function (done) {
             var lineCount = 0;
 
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'test override');
-                    lineCount++;
-                })
-                .execute('echo test -i 5', null, { message: 'test override', iterations: 10 });
+            shell.on('log', function (text, options) {
+                should.exist(text);
+                should.exist(options);
+                options.should.have.property('type', 'log');
+                text.should.equal('test override');
 
-            lineCount.should.equal(10);
+                lineCount++;
+                if (lineCount === 10) done();
+            }).execute('echo test -i 5', { message: 'test override', iterations: 10 });
         });
 
-        it('should display an error when parameter fails to pass validation.', function () {
+        it('should display an error when parameter fails to pass validation. [test 4]', function (done) {
+            shell.on('log', function (text, options) {
+                should.exist(text);
+                should.exist(options);
+                options.should.have.property('type', 'error');
+                done();
+            }).execute('echo test -i chicken');
+        });
+
+        it('should display an error when a required parameter is not supplied. [test 5]', function (done) {
+            shell.on('log', function (text, options) {
+                should.exist(text);
+                should.exist(options);
+                options.should.have.property('type', 'error');
+                done();
+            }).execute('echo');
+        });
+
+        it('should ask user for value if the option is required, prompt was set, and user did not supply a value. [test 6]', function (done) {
             var lineCount = 0;
-
             shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('type', 'error');
-                    lineCount++;
-                })
-                .execute('echo test -i chicken');
-
-            lineCount.should.equal(1);
-        });
-
-        it('should display an error when a required parameter is not supplied.', function () {
-            var lineCount = 0;
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('type', 'error');
-                    lineCount++;
-                })
-                .execute('echo');
-
-            lineCount.should.equal(1);
-        });
-
-        it('should ask user for value if the option is required, prompt was set, and user did not supply a value.', function () {
-            var context = {},
-                lineCount = 0;
-
-            shell
-                .onContextSave(function (updatedContext) {
-                    context = updatedContext;
-                })
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'Please enter your username.');
-                    lineCount++;
-                })
-                .execute('login', context);
-
-            lineCount.should.equal(1);
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    if (data.hasOwnProperty('password'))
-                        data.should.have.property('password', true);
-                    else {
-                        data.should.have.property('line').with.property('text', 'Please enter your password.');
-                        lineCount++;
+                .on('log', function (text, options) {
+                    should.exist(text);
+                    should.exist(options);
+                    options.should.have.property('type', 'log');
+                    switch (lineCount) {
+                        case 0:
+                            text.should.equal('Please enter your username.');
+                            break;
+                        case 1:
+                            text.should.equal('Please enter your password.');
+                            break;
+                        case 2:
+                            text.should.equal('Welcome back charlie!');
+                            done();
+                            break;
                     }
-                })
-                .execute('charlie', context);
-
-            lineCount.should.equal(2);
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'Welcome back charlie!');
                     lineCount++;
                 })
-                .execute('password123', context);
-
-            lineCount.should.equal(3);
+                .execute('login')
+                .execute('charlie')
+                .execute('password123');
         });
 
-        it('should not prompt user for value if the option is required and prompt was set, but the user already supplied a value for that option.', function () {
-            var lineCount = 0;
-
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    data.should.have.property('line').with.property('text', 'Welcome back charlie!');
-                    lineCount++;
-                })
-                .execute('login charlie password123');
-
-            lineCount.should.equal(1);
+        it('should not prompt user for value if the option is required and prompt was set, but the user already supplied a value for that option. [test 7]', function (done) {
+            shell.on('log', function (text, options) {
+                should.exist(text);
+                should.exist(options);
+                text.should.equal('Welcome back charlie!')
+                options.should.have.property('type', 'log');
+                done();
+            }).execute('login charlie password123');
         });
 
-        it('should send password:true when an option specifies it is a password value and prompt is set.', function () {
-            shell
-                .onData(function (data) {
-                    should.exist(data);
-                    if (data.hasOwnProperty(('password')))
-                        data.should.have.property('password', true);
-                })
-                .execute('login charlie');
+        it('should emit a password event when an option specifies it is a password value and prompt is set. [test 8]', function (done) {
+            shell.on('password', done).execute('login charlie');
         });
 
-    });
+        describe('context', function () {
 
-    describe('context', function () {
+            it('should contain a custom context variable when the command module calls the shell.context.setVar helper method. [test 9]', function (done) {
+                shell.on('done', function () {
+                    var recentTopic = shell.context.getVar('recentTopic');
+                    should.exist(recentTopic);
+                    recentTopic.should.equal(123);
+                    done();
+                }).execute('topic 123');
+            });
 
-        it('should contain a custom variable when the command module calls the shell.setVar helper method.', function () {
-            var context = {};
-
-            shell
-                .onContextSave(function (updatedContext) {
-                    context = updatedContext;
-                })
-                .execute('topic 123', context);
-
-            should.exist(context);
-            context.should.have.property('recentTopic', 123);
-        });
-
-        it ('should reset if shell.clearDisplay(true) is called.', function () {
-            var context = {};
-
-            shell
-                .onContextSave(function (updatedContext) {
-                    context = updatedContext;
-                })
-                .execute('login', context);
-
-            should.exist(context);
-            context.should.have.property('prompt').with.property('cmd', 'login');
-
-            shell.clearDisplay(true);
-
-            should.exist(context);
-            context.should.not.have.property('prompt');
         });
 
     });

@@ -1,24 +1,15 @@
 var validateCommandOptions = require('./validateCommandOptions'),
     shellQuote = require('shell-quote'),
-    extend = require('extend'),
-    shellHelpers = require('./shellHelpers');
+    yargs = require('yargs'),
+    extend = require('extend');
 
-module.exports = exports = function (cmdStr, context, options) {
+module.exports = exports = function (cmdStr, options) {
 
-    // Remove optimist from the module cache so it won't remember options we defined during last execution.
-    for (var key in require.cache)
-        if (key.match(/optimist\\index\.js$/))
-            delete require.cache[key];
+    var shell = this;
 
-    var shell = this,
-        optimist = require('optimist'); // Get fresh reference to optimist with every execution.
+    yargs.resetOptions();
 
-    // Todo: Modify optimist with a clearOptions function. When pull request is accepted put the require back at the top and remove the code to invalidate the cache. Then make a call to the new optimist function instead.
-
-    // Initialize shell helper methods.
-    if (context) shellHelpers.updateContext(context);
-
-    var prompt = shell.getVar('prompt');
+    var prompt = shell.context.getVar('prompt');
 
     // If no command string was supplied then write an error message.
     if (!prompt && (!cmdStr || /^[\s';"\[\]|&<>]+$|[()]/g.test(cmdStr)))
@@ -47,7 +38,7 @@ module.exports = exports = function (cmdStr, context, options) {
         // ...otherwise remove the command name from the args array and build our options object.
         if (!prompt) {
             args.splice(0, 1);
-            // Configure optimist based on defined command options.
+            // Configure yargs based on defined command options.
             if (cmd && cmd.hasOwnProperty('options')) {
                 for (var key in cmd.options) {
                     if (cmd.options.hasOwnProperty(key)) {
@@ -55,20 +46,20 @@ module.exports = exports = function (cmdStr, context, options) {
                         if (option.hasOwnProperty('type'))
                             switch(option.type.toLowerCase()) {
                                 case "string":
-                                    optimist.string(key);
+                                    yargs.string(key);
                                     if (option.hasOwnProperty('aliases'))
-                                        optimist.string(option.aliases);
+                                        yargs.string(option.aliases);
                                     break;
                                 case "boolean":
-                                    optimist.boolean(key);
+                                    yargs.boolean(key);
                                     if (option.hasOwnProperty('aliases'))
-                                        optimist.boolean(option.aliases);
+                                        yargs.boolean(option.aliases);
                             }
                     }
                 }
             }
             // Set options by extending the parsed user options with the manually supplied options.
-            options = extend({}, optimist.parse(args), options);
+            options = extend({}, yargs.parse(args), options);
         }
 
         // If the command module exists then process it's options and invoke the module.
@@ -76,22 +67,27 @@ module.exports = exports = function (cmdStr, context, options) {
             if (options.hasOwnProperty('?') || options.hasOwnProperty('help'))
                 shell.execute('help', context, { command: cmdName });
             else if (validateCommandOptions(options, cmd, shell))
-                cmd.invoke(shell, options);
+                try {
+                    cmd.invoke(shell, options);
+                } catch (err) {
+                    shell.error(err);
+                }
         }
         else
-            shell.error('"' + cmdName + '" is not a valid command');
+            shell.log('"' + cmdName + '" is not a valid command', { type: 'error' });
     }
     else {
         // If prompt exists then cancel it...
         if (prompt){
-            shell.warn('prompt canceled');
+            shell.log('prompt canceled', { type: 'warn' });
             shell.clearPrompt();
         }
         // ...otherwise inform user there is no active prompt.
         else
-            shell.error('there are no active prompts');
+            shell.log('there are no active prompts', { type: 'warn' });
 
     }
 
+    shell.emit('done');
     return shell;
 };

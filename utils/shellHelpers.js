@@ -1,14 +1,86 @@
 var fs = require('fs'),
     path = require('path'),
-    context = {};
+    format = require('./format'),
+    extend = require('extend');
 
-exports.updateContext = function (newContext) {
-    context = newContext;
+exports.loadHelpers = function (shell) {
+
+    // Clear display helper function.
+    shell.clear = function () {
+        shell.emit('clear');
+        return shell;
+    };
+
+    // Exit helper function.
+    shell.exit = function () {
+        shell.emit('exit');
+        return shell;
+    };
+
+    // Password helper function.
+    shell.password = function () {
+        shell.emit('password');
+        return shell;
+    };
+
+    // Log helper function.
+    shell.log = function (text, options) {
+        var options = extend({ type: 'log' }, options);
+        shell.emit('log', text ? text.toString() : '', options);
+        return shell;
+    };
+
+    // Error helper function.
+    shell.error = function (err) {
+        if (shell.listeners('error').length > 0)
+            shell.emit('error', err);
+        else
+            throw err;
+        return shell;
+    };
+
+    // Edit helper function.
+    shell.edit = function (text) {
+        shell.emit('edit', text);
+        return shell;
+    };
+
+    // Shell context API. Easily overridden if needed.
+    shell.context = {
+        data: {},
+        setVar: function (name, value) {
+            this.data[name] = value;
+        },
+        getVar: function (name) {
+            return this.data[name];
+        },
+        delVar: function (name) {
+            delete this.data[name];
+        }
+    };
+
+    shell.setPrompt = function(key, cmdName, options, msg) {
+        var prompt = {
+            option: key,
+            cmd: cmdName,
+            options: options,
+            msg: msg || key
+        };
+        return shell.context.setVar('prompt', prompt);
+    };
+
+    shell.clearPrompt = function () {
+        shell.context.delVar('prompt');
+    };
+
+    // Load these down below so they don't clutter.
+    commandModuleLoadingFunctions(shell);
 };
 
-exports.registerShellMethods = function (shell) {
+// Return the rather large loadCommandModule function so it doesn't clutter up above.
+function commandModuleLoadingFunctions(shell) {
     // Load specified command module into shell.cmds.
-    shell.loadCommandModule = function(cmdPath) {
+    shell.loadCommandModule = function (cmdPath) {
         try {
             var stats = fs.statSync(cmdPath);
             if (stats) {
@@ -45,17 +117,16 @@ exports.registerShellMethods = function (shell) {
                         shell.cmds[cmdName] = cmd;
                     }
                     else if (shell.settings.debug)
-                        console.warn("%s is not a valid shotgun command module and was not loaded.", cmdPath);
+                        shell.error(format("{0} is not a valid shotgun command module and was not loaded.", cmdPath));
                 }
             }
-        } catch (ex) {
+        } catch (err) {
             if (shell.settings.debug)
-                console.error("%s failed to load with exception: %s", cmdPath, ex.message);
+                shell.error(format("{0} failed to load with exception: {1}", cmdPath, err.message));
         }
         return shell;
     };
 
-    // Loads all command modules from the specified directory and loads them.
     shell.loadCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
@@ -66,110 +137,4 @@ exports.registerShellMethods = function (shell) {
         }
         return shell;
     };
-
-    // Default helper functions.
-    var saveContext = shell.send = function () {
-        return shell;
-    };
-
-    // Create a generic data callback.
-    shell.onData = function (callback) {
-        shell.send = function (data) {
-            callback(data);
-            return shell;
-        };
-        return shell;
-    };
-
-    // Clear display helper function.
-    shell.clearDisplay = function (resetContext) {
-        if (resetContext) shell.resetContext();
-        return shell.send({ clearDisplay: true });
-    };
-
-    // Exit helper function.
-    shell.exit = function () {
-        return shell.send({ exit: true });
-    };
-
-    // Password helper function.
-    shell.password = function () {
-        return shell.send({ password: true });
-    };
-
-    // Log helper functions.
-    shell.log = function (text, options) {
-        return shell.send({
-            line: {
-                options: options || {},
-                type: 'log',
-                text: text ? text.toString() : ''
-            }
-        });
-    };
-    shell.warn = function (text, options) {
-        return shell.send({
-            line: {
-                options: options || {},
-                type: 'warn',
-                text: text ? text.toString() : ''
-            }
-        });
-    };
-    shell.error = function (text, options) {
-        return shell.send({
-            line: {
-                options: options || {},
-                type: 'error',
-                text: text ? text.toString() : ''
-            }
-        });
-    };
-    shell.debug = function (text, options) {
-        return shell.send({
-            line: {
-                options: options || {},
-                type: 'debug',
-                text: text ? text.toString() : ''
-            }
-        });
-    };
-    shell.edit = function (text) {
-        return shell.send({ edit: text });
-    };
-
-    shell.onContextSave = function (callback) {
-        saveContext = function () {
-            callback(context);
-            return shell;
-        };
-        return shell;
-    };
-    shell.setVar = function (key, value) {
-        context[key] = value;
-        return saveContext();
-    };
-    shell.getVar = function (key) {
-        return context[key];
-    };
-    shell.delVar = function (key) {
-        if (!context.hasOwnProperty(key))
-            return;
-        delete context[key];
-        return saveContext();
-    };
-    shell.setPrompt = function(key, cmdName, options, msg) {
-        var prompt = {
-            option: key,
-            cmd: cmdName,
-            options: options,
-            msg: msg || key
-        };
-        return shell.setVar('prompt', prompt);
-    };
-    shell.clearPrompt = shell.delVar.bind(shell, 'prompt');
-    shell.resetContext = function() {
-        context = {};
-        return saveContext();
-    }
-};
+}

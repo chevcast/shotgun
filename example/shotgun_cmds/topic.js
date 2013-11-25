@@ -12,6 +12,6 @@ exports.options = {
 };
 
 exports.invoke = function (shell, options) {
-    shell.setVar('recentTopic', options.id);
+    shell.context.setVar('recentTopic', options.id);
     shell.log('[topic ' + options.id + ' content]');
 };

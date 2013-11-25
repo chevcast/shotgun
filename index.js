@@ -1,6 +1,9 @@
-var extend = require('extend'),
+var events = require('events'),
+    util = require('util'),
+    fs = require('fs'),
+    path = require('path'),
+    extend = require('extend'),
     shellHelpers = require('./utils/shellHelpers'),
-    loadCommandModules = require('./utils/loadCommandModules'),
     execute = require('./utils/execute'),
     defaultSettings = require('./settings');
 
@@ -10,6 +13,9 @@ module.exports.Shell = function (options) {
     // Alias 'this' so we can access in other scopes.
     var shell = this;
 
+    // Invoke event emitter constructor.
+    events.EventEmitter.call(this);
+
     // Attach settings to shell.
     shell.settings = extend(true, {}, defaultSettings, options);;
 
@@ -17,11 +23,31 @@ module.exports.Shell = function (options) {
     shell.cmds = {};
 
     // Initialize shell helper methods.
-    shellHelpers.registerShellMethods(shell);
+    shellHelpers.loadHelpers(shell);
 
-    // Initialize command modules.
-    loadCommandModules(shell);
+    // Load custom command modules.
+    shell.loadCommandModules(shell.settings.cmdsDir);
+
+    // Load default command modules.
+    for (var key in shell.settings.defaultCmds) {
+        if (shell.settings.defaultCmds[key] && !shell.cmds.hasOwnProperty(key))
+            shell.loadCommandModule(path.resolve(__dirname, 'default_cmds', key + '.js'));
+    }
+
+    // Load command modules installed from npm.
+    if (shell.settings.loadNpmCmds) {
+        var nodeModulesDir = path.resolve(__dirname, '..');
+        var nodeModules = fs.readdirSync(nodeModulesDir);
+        if (nodeModules)
+            nodeModules.forEach(function (module) {
+                if (module.indexOf('shotguncmd-') === 0)
+                    shell.loadCommandModule(path.resolve(nodeModulesDir, module));
+            });
+    }
 
     // Define the execute function that the application will call and pass in user input.
     shell.execute = execute;
 };
+
+// Make Shell inherit from events.EventEmitter.
+util.inherits(module.exports.Shell, events.EventEmitter);

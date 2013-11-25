@@ -68,7 +68,7 @@ module.exports = exports = function (options, cmd, shell) {
                 if (definedOption.validate instanceof RegExp) {
                     // If value does not pass validation then do not invoke command and write error message.
                     if (!definedOption.validate.test(options[key])) {
-                        shell.error('invalid value for "' + key + '"');
+                        shell.log('invalid value for "' + key + '"', { type: 'error' });
                         return false;
                     }
                 }
@@ -80,9 +80,9 @@ module.exports = exports = function (options, cmd, shell) {
                         var validationResult = definedOption.validate(options[key], shell, options);
                         if (validationResult !== true) {
                             if (typeof(validationResult) !== 'string')
-                                shell.error('invalid value for "' + key + '"');
+                                shell.log('invalid value for "' + key + '"', { type: 'error' });
                             else
-                                shell.error(validationResult);
+                                shell.log(validationResult, { type: 'error' });
                             return false;
                         }
                     }
@@ -97,7 +97,7 @@ module.exports = exports = function (options, cmd, shell) {
 
             // If option is required but is not found in supplied options then error.
             if (definedOption.hasOwnProperty('required') && !options.hasOwnProperty(key)) {
-                shell.error('missing parameter "' + key + '"');
+                shell.log('missing parameter "' + key + '"', { type: 'error' });
                 return false;
             }
         }
