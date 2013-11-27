@@ -116,10 +116,11 @@ describe('Shotgun', function () {
 
             it('should contain a custom context variable when the command module calls the shell.context.setVar helper method. [test 9]', function (done) {
                 shell.on('done', function () {
-                    var recentTopic = shell.context.getVar('recentTopic');
-                    should.exist(recentTopic);
-                    recentTopic.should.equal(123);
-                    done();
+                    shell.context.getVar('recentTopic', function (recentTopic) {
+                        should.exist(recentTopic);
+                        recentTopic.should.equal(123);
+                        done();
+                    });
                 }).execute('topic 123');
             });
 

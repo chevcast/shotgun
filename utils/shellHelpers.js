@@ -51,8 +51,8 @@ exports.loadHelpers = function (shell) {
         setVar: function (name, value) {
             this.data[name] = value;
         },
-        getVar: function (name) {
-            return this.data[name];
+        getVar: function (name, callback) {
+            callback(this.data[name]);
         },
         delVar: function (name) {
             delete this.data[name];
