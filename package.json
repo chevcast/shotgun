@@ -6,7 +6,8 @@
   "dependencies": {
     "yargs": "*",
     "shell-quote": "*",
-    "extend": "*"
+    "extend": "*",
+    "eventemitter2": "*"
   },
   "devDependencies": {
     "mocha": "*",
