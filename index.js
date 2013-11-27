@@ -1,4 +1,4 @@
-var events = require('events'),
+var EventEmitter = require('eventemitter2').EventEmitter2,
     util = require('util'),
     fs = require('fs'),
     path = require('path'),
@@ -14,7 +14,7 @@ module.exports.Shell = function (options) {
     var shell = this;
 
     // Invoke event emitter constructor.
-    events.EventEmitter.call(this);
+    EventEmitter.call(this);
 
     // Attach settings to shell.
     shell.settings = extend(true, {}, defaultSettings, options);;
@@ -49,5 +49,5 @@ module.exports.Shell = function (options) {
     shell.execute = execute;
 };
 
-// Make Shell inherit from events.EventEmitter.
-util.inherits(module.exports.Shell, events.EventEmitter);
+// Make Shell inherit from EventEmitter.
+util.inherits(module.exports.Shell, EventEmitter);
