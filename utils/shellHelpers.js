@@ -77,7 +77,7 @@ exports.loadHelpers = function (shell) {
     commandModuleLoadingFunctions(shell);
 };
 
-// Return the rather large loadCommandModule function so it doesn't clutter up above.
+// Define the rather large loadCommandModule function separately so it doesn't clutter up above.
 function commandModuleLoadingFunctions(shell) {
     // Load specified command module into shell.cmds.
     shell.loadCommandModule = function (cmdPath) {
