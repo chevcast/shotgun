@@ -8,16 +8,16 @@ var readline = require('readline'),
     };
 
 var rl = readline.createInterface(process.stdin, process.stdout);
+rl.setPrompt(currentUser + '> ');
 
 shell
     .on('switchUser', function (username, contextData) {
         contexts[currentUser] = contextData;
         currentUser = username;
         shell.log("User switched to: " + currentUser);
+        rl.setPrompt(currentUser + '> ');
     })
     .on('log', function (text, options) {
-        if (text.length > 0)
-            text = currentUser + ': ' + text;
         console[options.type](text);
     })
     .on('clear', function () {
@@ -30,7 +30,7 @@ shell
     .on('error', console.error.bind(console));
 
 rl.on('line', function (userInput) {
-    shell.execute(userInput, null, contexts[currentUser]);
+    shell.execute(userInput, contexts[currentUser]);
     rl.prompt();
 });
 

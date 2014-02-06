@@ -20,11 +20,11 @@ describe('Shotgun', function () {
             shell.on('clear', done).execute('clear');
         });
 
-        it('should emit an exit event when exit command is run.', function (done) {
+        it('should emit an exit event when exit command is run. [test 2]', function (done) {
             shell.on('exit', done).execute('exit');
         });
 
-        it('should understand command line options passed by the user. [test 2]', function (done) {
+        it('should understand command line options passed by the user. [test 3]', function (done) {
             var lineCount = 0;
 
             shell
@@ -40,7 +40,7 @@ describe('Shotgun', function () {
                 .execute('echo "she sells sea shells down by the seashore" -i 5');
         });
 
-        it('should override user supplied options if options are passed in manually. [test 3]', function (done) {
+        it('should override user supplied options if options are passed in manually. [test 4]', function (done) {
             var lineCount = 0;
 
             shell.on('log', function (text, options) {
@@ -51,10 +51,10 @@ describe('Shotgun', function () {
 
                 lineCount++;
                 if (lineCount === 10) done();
-            }).execute('echo test -i 5', { message: 'test override', iterations: 10 });
+            }).execute('echo test -i 5', null, { message: 'test override', iterations: 10 });
         });
 
-        it('should display an error when parameter fails to pass validation. [test 4]', function (done) {
+        it('should display an error when parameter fails to pass validation. [test 5]', function (done) {
             shell.on('log', function (text, options) {
                 should.exist(text);
                 should.exist(options);
@@ -63,7 +63,7 @@ describe('Shotgun', function () {
             }).execute('echo test -i chicken');
         });
 
-        it('should display an error when a required parameter is not supplied. [test 5]', function (done) {
+        it('should display an error when a required parameter is not supplied. [test 6]', function (done) {
             shell.on('log', function (text, options) {
                 should.exist(text);
                 should.exist(options);
@@ -72,7 +72,7 @@ describe('Shotgun', function () {
             }).execute('echo');
         });
 
-        it('should ask user for value if the option is required, prompt was set, and user did not supply a value. [test 6]', function (done) {
+        it('should ask user for value if the option is required, prompt was set, and user did not supply a value. [test 7]', function (done) {
             var lineCount = 0;
             shell
                 .on('log', function (text, options) {
@@ -98,7 +98,7 @@ describe('Shotgun', function () {
                 .execute('password123');
         });
 
-        it('should not prompt user for value if the option is required and prompt was set, but the user already supplied a value for that option. [test 7]', function (done) {
+        it('should not prompt user for value if the option is required and prompt was set, but the user already supplied a value for that option. [test 8]', function (done) {
             shell.on('log', function (text, options) {
                 should.exist(text);
                 should.exist(options);
@@ -108,13 +108,13 @@ describe('Shotgun', function () {
             }).execute('login charlie password123');
         });
 
-        it('should emit a password event when an option specifies it is a password value and prompt is set. [test 8]', function (done) {
+        it('should emit a password event when an option specifies it is a password value and prompt is set. [test 9]', function (done) {
             shell.on('password', done).execute('login charlie');
         });
 
         describe('context', function () {
 
-            it('should contain a custom context variable when the command module calls the shell.context.setVar helper method. [test 9]', function (done) {
+            it('should contain a custom context variable when the command module calls the shell.context.setVar helper method. [test 10]', function (done) {
                 shell.on('done', function () {
                     shell.context.getVar('recentTopic', function (recentTopic) {
                         should.exist(recentTopic);

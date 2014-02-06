@@ -3,7 +3,7 @@ var validateCommandOptions = require('./validateCommandOptions'),
     yargs = require('yargs'),
     extend = require('extend');
 
-module.exports = exports = function (cmdStr, options, contextData) {
+module.exports = exports = function (cmdStr, contextData, options) {
 
     var shell = this;
 

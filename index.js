@@ -47,6 +47,7 @@ module.exports.Shell = function (options) {
 
     // Define the execute function that the application will call and pass in user input.
     shell.execute = execute;
+
 };
 
 // Make Shell an EventEmitter2.
