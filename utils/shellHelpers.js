@@ -50,12 +50,14 @@ exports.loadHelpers = function (shell) {
         data: {},
         setVar: function (name, value) {
             this.data[name] = value;
+            shell.emit('contextChanged', this.data);
         },
         getVar: function (name, callback) {
             callback(this.data[name]);
         },
         delVar: function (name) {
             delete this.data[name];
+            shell.emit('contextChanged', this.data);
         }
     };
 

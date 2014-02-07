@@ -90,6 +90,7 @@ module.exports = exports = function (cmdStr, contextData, options) {
 
         }
 
+        // Emit a done event to signal we are finished with this execution.
         shell.emit('done');
 
     });
