@@ -13,9 +13,8 @@ exports.options = {
 };
 
 exports.invoke = function (shell, options) {
-    shell.context.getVar('recentTopic', function (topicId) {
-        if (typeof topicId === 'undefined') return shell.log("You are not viewing a topic.");;
-        shell.log("Your reply was posted to topic " + topicId + ".");
-        shell.log('Your reply was: ' + options.content.replace(/\n/g, ""));
-    });
+    var topicId = shell.context.getVar('recentTopic');
+    if (typeof topicId === 'undefined') return shell.log("You are not viewing a topic.");;
+    shell.log("Your reply was posted to topic " + topicId + ".");
+    shell.log('Your reply was: ' + options.content.replace(/\n/g, ""));
 };

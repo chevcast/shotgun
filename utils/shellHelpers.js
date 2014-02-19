@@ -53,7 +53,7 @@ exports.loadHelpers = function (shell) {
             shell.emit('contextChanged', this.data);
         },
         getVar: function (name, callback) {
-            callback(this.data[name]);
+            return this.data[name];
         },
         delVar: function (name) {
             delete this.data[name];

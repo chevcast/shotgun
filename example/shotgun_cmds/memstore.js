@@ -5,9 +5,6 @@ exports.invoke = function (shell, options) {
         shell.context.setVar('message', options.message);
         shell.log("Message saved.");
     }
-    else if (options.retrieve) {
-        shell.context.getVar('message', function (message) {
-            shell.log("Your message was: " + message);
-        });
-    }
+    else if (options.retrieve)
+        shell.log("Your message was: " + shell.context.getVar('message'));
 };

@@ -14,7 +14,7 @@
     "chai": "*"
   },
   "scripts": {
-    "test": "mocha -R tap"
+    "test": "mocha -R spec"
   },
   "repository": {
     "type": "git",
