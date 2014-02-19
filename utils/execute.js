@@ -67,7 +67,7 @@ module.exports = exports = function (cmdStr, contextData, options) {
             // If the command module exists then process it's options and invoke the module.
             if (cmd && cmd.access(shell, cmdName.toLowerCase())) {
                 if (options.hasOwnProperty('?') || options.hasOwnProperty('help'))
-                    shell.execute('help', context, { command: cmdName });
+                    shell.execute('help', contextData, { command: cmdName });
                 else if (validateCommandOptions(options, cmd, shell))
                     try {
                         cmd.invoke(shell, options);
