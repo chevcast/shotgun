@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+/*
+ * This file can be run from the command line as long as it had execute permissions.
+ * The line above tells unix to parse this file with node instead of bash.
+ *
+ * There is also a shotgun_cmds folder in the same directory as this script.
+ * Run "shotgun module" within that directory to generate command module scaffolds.
+ */
+
+var shotgun = require('shotgun'),
+    path = require('path'),
+    readline = require('readline');
+
+// Instantiate a shotgun shell.
+var shell = new shotgun.Shell({
+    // Disable exit & clear default commands.
+    defaultCmds: {
+        exit: false,
+        clear: false
+    }
+});
+
+// Shave off the first two args from process.argv.
+var args = process.argv;
+args.splice(0, 2);
+// Create a command string from the rest of the input.
+var cmdStr = args.join(' ');
+
+// This gets set to true if the script wants to prompt the user for a value.
+var isPrompt = false;
+
+// Handle shell events.
+shell
+    .on('error', console.error.bind(console))
+    .on('clear', function () {
+        // Clear console with ASCII control sequences.
+        console.log('\u001B[2J\u001B[0;0f');
+    })
+    .on('log', function (text, options) {
+        console.log(text);
+    })
+    .on('contextChanged', function (context) {
+        // If a prompt is set then set isPrompt to true.
+        isPrompt = context.hasOwnProperty('prompt');
+    })
+    .on('done', function () {
+        if (!isPrompt) return;
+        
+        // The script has finished parsing the command string but needs additional
+        // data. Start a readline prompt and pipe the user input back into shotgun.
+        isPrompt = false;
+        var rl = readline.createInterface(process.stdin, process.stdout);
+        rl.on('line', function (userInput) {
+            rl.close();
+            shell.execute(userInput);
+        });
+        rl.prompt();
+    });
+
+// Pass the command string into shotgun to be parsed and executed.
+shell.execute(cmdStr);

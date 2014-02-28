@@ -1,0 +1,15 @@
+// A short description of what this command module does. Displayed in help.
+exports.description = "{{description}}";
+
+// A string representing how the command should be used.
+exports.usage = "{{usage}}";
+
+// The options this command understands.
+exports.options = {
+    /* your defined options here, if any */   
+};
+
+// The function that should run when the command is invoked.
+exports.invoke = function (shell, options) {
+    /* your code here */
+};

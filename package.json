@@ -13,6 +13,9 @@
     "mocha": "*",
     "chai": "*"
   },
+  "bin": {
+    "shotgun": "./bin/shotgun-scaffold.js"
+  },
   "scripts": {
     "test": "mocha -R spec"
   },
