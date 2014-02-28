@@ -142,6 +142,7 @@ function commandModuleLoadingFunctions(shell) {
         }
         return shell;
     };
+
     // Locate and load all command modules within a directory.
     shell.loadCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
