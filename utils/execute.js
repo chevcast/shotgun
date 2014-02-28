@@ -75,7 +75,7 @@ module.exports = exports = function (cmdStr, contextData, options) {
                             // Invoke is asynchronous so we must pass in a callback that emits
                             // the done event when it is called.
                             cmd.invoke(shell, options, function (err) {
-                                if (err) return shell.error(err);
+                                if (err) shell.error(err);
                                 shell.emit('done');
                             });
                         default:
