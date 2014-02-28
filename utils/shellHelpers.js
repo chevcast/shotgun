@@ -81,7 +81,51 @@ exports.loadHelpers = function (shell) {
 
 // Define the rather large loadCommandModule function separately so it doesn't clutter up above.
 function commandModuleLoadingFunctions(shell) {
-    // Load specified command module into shell.cmds.
+
+    // Register a new command module.
+    shell.registerCmd = function () {
+        var cmd, cmdName;
+        switch (arguments.length) {
+            case 1:
+                cmd = arguments[0];
+                cmdName = cmd.name.toLowerCase();
+                break;
+            case 2:
+                cmdName = arguments[0].toLowerCase();
+                cmd = arguments[1];
+                cmd.name = cmdName;
+                break;
+            default:
+                return shell.error("You must supply a cmd module to registerCmd.");
+        }
+        if (cmd && cmd.invoke) {
+            if (cmd.hasOwnProperty('options')) {
+                for (var key in cmd.options) {
+                    if (cmd.options.hasOwnProperty(key)) {
+                        var definedOption = cmd.options[key];
+                        if (definedOption.hasOwnProperty('aliases'))
+                            if (typeof definedOption.aliases === 'string')
+                                definedOption.aliases = definedOption.aliases.toString().replace(/, /, ',').split(',');
+                    }
+                }
+            }
+            if (typeof cmd.access === 'undefined') {
+                if (typeof shell.settings.defaultCmdAccess === 'boolean') {
+                    var defaultCmdAccess = shell.settings.defaultCmdAccess;
+                    cmd.access = function () { return defaultCmdAccess; };
+                } else
+                    cmd.access = shell.settings.defaultCmdAccess;
+            }
+            else if (typeof cmd.access === 'boolean') {
+                var access = cmd.access;
+                cmd.access = function () { return access; };
+            }
+            shell.cmds[cmdName] = cmd;
+        } else if (shell.settings.debug)
+            shell.error(format("{0} is not a valid shotgun command module and was not loaded.", cmdPath));
+    };
+
+    // Locate and load the specified command module into shell.cmds.
     shell.loadCommandModule = function (cmdPath) {
         try {
             var stats = fs.statSync(cmdPath);
@@ -89,37 +133,7 @@ function commandModuleLoadingFunctions(shell) {
                 if (path.extname(cmdPath).toLowerCase() === '.js' || stats.isDirectory()) {
                     var cmd = require(cmdPath);
                     var cmdName = path.basename(cmdPath, '.js').toLowerCase().replace(/^shotguncmd-/i, "");
-                    if (cmd && cmd.invoke) {
-                        if (!cmd.hasOwnProperty('name'))
-                            cmd.name = cmdName.toLowerCase();
-                        else
-                            cmdName = cmd.name;
-                        if (cmd.hasOwnProperty('options')) {
-                            for (var key in cmd.options) {
-                                if (cmd.options.hasOwnProperty(key)) {
-                                    var definedOption = cmd.options[key];
-                                    if (definedOption.hasOwnProperty('aliases'))
-                                        if (typeof(definedOption.aliases) === 'string')
-                                            definedOption.aliases = definedOption.aliases.toString().replace(/, /, ',').split(',');
-                                }
-                            }
-                        }
-                        if (typeof(cmd.access) === 'undefined') {
-                            if (typeof(shell.settings.defaultCmdAccess) === 'boolean') {
-                                var defaultCmdAccess = shell.settings.defaultCmdAccess;
-                                cmd.access = function () { return defaultCmdAccess; };
-                            }
-                            else
-                                cmd.access = shell.settings.defaultCmdAccess;
-                        }
-                        else if (typeof(cmd.access) === 'boolean') {
-                            var access = cmd.access;
-                            cmd.access = function () { return access; };
-                        }
-                        shell.cmds[cmdName] = cmd;
-                    }
-                    else if (shell.settings.debug)
-                        shell.error(format("{0} is not a valid shotgun command module and was not loaded.", cmdPath));
+                    shell.registerCmd(cmdName, cmd);
                 }
             }
         } catch (err) {
@@ -128,7 +142,7 @@ function commandModuleLoadingFunctions(shell) {
         }
         return shell;
     };
-
+    // Locate and load all command modules within a directory.
     shell.loadCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
