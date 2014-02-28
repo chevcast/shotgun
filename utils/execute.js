@@ -70,7 +70,21 @@ module.exports = exports = function (cmdStr, contextData, options) {
                 shell.execute('help', contextData, { command: cmdName });
             else if (validateCommandOptions(options, cmd, shell))
                 try {
-                    cmd.invoke(shell, options);
+                    switch (cmd.invoke.length) {
+                        case 3:
+                            // Invoke is asynchronous so we must pass in a callback that emits
+                            // the done event when it is called.
+                            cmd.invoke(shell, options, function (err) {
+                                if (err) return shell.error(err);
+                                shell.emit('done');
+                            });
+                        default:
+                            // Invoke is not asynchronous so do not pass in a callback.
+                            cmd.invoke(shell, options);
+                            // Emit a done event after invoke returns.
+                            shell.emit('done');
+                            break;
+                    }
                 } catch (err) {
                     shell.error(err);
                 }
@@ -90,8 +104,6 @@ module.exports = exports = function (cmdStr, contextData, options) {
 
     }
 
-    // Emit a done event to signal we are finished with this execution.
-    shell.emit('done');
 
     return shell;
 };
