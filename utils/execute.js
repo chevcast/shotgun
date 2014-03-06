@@ -68,7 +68,7 @@ module.exports = exports = function (cmdStr, contextData, options) {
         if (cmd && cmd.access(shell, cmdName.toLowerCase())) {
             if (options.hasOwnProperty('?') || options.hasOwnProperty('help'))
                 shell.execute('help', contextData, { command: cmdName });
-            else if (validateCommandOptions(options, cmd, shell))
+            else if (validateCommandOptions(options, cmd, shell)) {
                 try {
                     switch (cmd.invoke.length) {
                         case 3:
@@ -89,6 +89,8 @@ module.exports = exports = function (cmdStr, contextData, options) {
                 } catch (err) {
                     shell.error(err);
                 }
+            } else
+                shell.emit('done');
         }
         else
             shell.log('"' + cmdName + '" is not a valid command', { type: 'error' });

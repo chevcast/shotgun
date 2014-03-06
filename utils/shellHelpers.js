@@ -25,14 +25,14 @@ exports.loadHelpers = function (shell) {
 
     // Log helper function.
     shell.log = function (text, options) {
-        var options = extend({ type: 'log' }, options);
+        options = extend({ type: 'log' }, options);
         shell.emit('log', text ? text.toString() : '', options);
         return shell;
     };
 
     // Error helper function.
     shell.error = function (err) {
-        if (shell.listeners('error').length > 0)
+        if (shell.listeners('error').length > 0 || shell.listenersAny().length > 0)
             shell.emit('error', err);
         else
             throw err;
