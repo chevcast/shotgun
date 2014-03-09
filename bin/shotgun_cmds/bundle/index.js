@@ -1,6 +1,5 @@
 var fs = require('fs');
 var path = require('path');
-var cmdBundle = require('browserify')();
 
 // A short description of what this command module does. Displayed in help.
 exports.description = "Creates a bundle containing your custom command modules.";
