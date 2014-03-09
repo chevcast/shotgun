@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var browserify = require('browserify-string');
+var cmdBundle = require('browserify')();
 
 // A short description of what this command module does. Displayed in help.
 exports.description = "Creates a bundle containing your custom command modules.";
@@ -41,13 +41,11 @@ exports.invoke = function (shell, options) {
                     }
                 }
             });
-            var bundleStream = browserify("module.exports = {" + cmdModules.join(',') + "};").bundle();
-            if (options.hasOwnProperty('output')) {
-                bundleStream.pipe(fs.createWriteStream(options.output));
-                shell.log("Bundle saved to \"" + options.output + "\".");
-            } else {
-                bundleStream.pipe(process.stdout);
-            }
+            var outStream = process.stdout;
+            if (options.hasOwnProperty('output'))
+                outStream = fs.createWriteStream(options.output);
+            outStream.write("module.exports = {" + cmdModules.join(',') + "};");
+            //fs.unlinkSync(tempFile);
         }
     } else
         shell.error('The specified path does not exist.');
