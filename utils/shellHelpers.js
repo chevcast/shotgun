@@ -125,6 +125,14 @@ function commandModuleLoadingFunctions(shell) {
             shell.error(format("{0} is not a valid shotgun command module and was not loaded.", cmdPath));
     };
 
+    // Register multiple command modules at once.
+    shell.registerCmds = function (cmds) {
+        for (var cmdName in cmds) {
+            if (!cmds.hasOwnProperty(cmdName)) return;
+            shell.registerCmd(cmdName, cmds[cmdName]);
+        }
+    };
+
     // Locate and load the specified command module into shell.cmds.
     shell.loadCommandModule = function (cmdPath) {
         try {
@@ -147,10 +155,11 @@ function commandModuleLoadingFunctions(shell) {
     shell.loadCommandModules = function(dir) {
         if (fs.existsSync(dir)) {
             var files = fs.readdirSync(dir);
-            if (files)
+            if (files) {
                 files.forEach(function (file) {
                     shell.loadCommandModule(path.resolve(dir, file));
                 });
+            }
         }
         return shell;
     };

@@ -7,14 +7,16 @@
     "yargs": "*",
     "shell-quote": "1.3.3",
     "extend": "*",
-    "eventemitter2": "*"
+    "eventemitter2": "*",
+    "browserify": "^2.20.2",
+    "browserify-string": "0.0.3"
   },
   "devDependencies": {
     "mocha": "*",
     "chai": "*"
   },
   "bin": {
-    "shotgun": "./bin/shotgun-scaffold.js"
+    "shotgun": "./bin/shotgun.js"
   },
   "scripts": {
     "test": "mocha -R spec"

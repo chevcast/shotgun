@@ -17,7 +17,7 @@ module.exports.Shell = function (options) {
     EventEmitter2.call(this);
 
     // Attach settings to shell.
-    shell.settings = extend(true, {}, defaultSettings, options);;
+    shell.settings = extend(true, {}, defaultSettings, options);
 
     // This property will store all the available command modules.
     shell.cmds = {};
@@ -25,25 +25,30 @@ module.exports.Shell = function (options) {
     // Initialize shell helper methods.
     shellHelpers.loadHelpers(shell);
 
-    // Load custom command modules.
-    shell.loadCommandModules(shell.settings.cmdsDir);
+    // If shotgun is running in the browser then don't auto-load command modules.
+    if (typeof(window) === 'undefined') {
+        // Load custom command modules.
+        shell.loadCommandModules(shell.settings.cmdsDir);
+
+        // Load command modules installed from npm.
+        if (shell.settings.loadNpmCmds) {
+            var nodeModulesDir = path.resolve(__dirname, '..');
+            var nodeModules = fs.readdirSync(nodeModulesDir);
+            if (nodeModules)
+                nodeModules.forEach(function (module) {
+                    if (module.indexOf('shotguncmd-') === 0)
+                        shell.loadCommandModule(path.resolve(nodeModulesDir, module));
+                });
+        }
+    }
 
     // Load default command modules.
-    for (var key in shell.settings.defaultCmds) {
-        if (shell.settings.defaultCmds[key] && !shell.cmds.hasOwnProperty(key))
-            shell.loadCommandModule(path.resolve(__dirname, 'default_cmds', key + '.js'));
-    }
-
-    // Load command modules installed from npm.
-    if (shell.settings.loadNpmCmds) {
-        var nodeModulesDir = path.resolve(__dirname, '..');
-        var nodeModules = fs.readdirSync(nodeModulesDir);
-        if (nodeModules)
-            nodeModules.forEach(function (module) {
-                if (module.indexOf('shotguncmd-') === 0)
-                    shell.loadCommandModule(path.resolve(nodeModulesDir, module));
-            });
-    }
+    if (shell.settings.defaultCmds.help && !shell.cmds.help)
+        shell.registerCmd('help', require('./default_cmds/help.js'));
+    if (shell.settings.defaultCmds.exit && !shell.cmds.exit)
+        shell.registerCmd('exit', require('./default_cmds/exit.js'));
+    if (shell.settings.defaultCmds.clear && !shell.cmds.clear)
+        shell.registerCmd('clear', require('./default_cmds/clear.js'));
 
     // Define the execute function that the application will call and pass in user input.
     shell.execute = execute;

@@ -5,11 +5,12 @@ var shotgun = require('../'),
     readline = require('readline');
 
 var shell = new shotgun.Shell({
-    cmdsDir: path.join(__dirname, 'scaffold_cmds'),
+    cmdsDir: path.join(__dirname, 'shotgun_cmds'),    
     defaultCmds: {
         exit: false,
         clear: false
-    }
+    },
+    debug: true
 });
 
 var args = process.argv;
