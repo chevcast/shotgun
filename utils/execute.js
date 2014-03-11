@@ -19,7 +19,8 @@ module.exports = exports = function (cmdStr, contextData, options) {
 
     // Parse the command string into an argument array and set the command name to the first item.
     var args = cmdStr,
-        cmdName = cmdStr;
+        cmdName = cmdStr,
+        asyncCmd = false; 
     if (cmdStr.length > 0) {
         args = shellQuote.parse(cmdStr);
         cmdName = args[0];
@@ -70,32 +71,25 @@ module.exports = exports = function (cmdStr, contextData, options) {
                 shell.execute('help', contextData, { command: cmdName });
             else if (validateCommandOptions(options, cmd, shell)) {
                 try {
-                    switch (cmd.invoke.length) {
-                        case 3:
-                            // Invoke is asynchronous so we must pass in a callback that emits
-                            // the done event when it is called.
-                            cmd.invoke(shell, options, function (err) {
-                                if (err) shell.error(err);
-                                shell.emit('done');
-                            });
-                            break;
-                        default:
-                            // Invoke is not asynchronous so do not pass in a callback.
-                            cmd.invoke(shell, options);
-                            // Emit a done event after invoke returns.
+                    if (cmd.invoke.length === 3) {
+                        // This is an async command module so set asyncCmd to true.
+                        asyncCmd = true;
+                        // Invoke is asynchronous so we must pass in a callback that emits
+                        // the done event when it is called.
+                        cmd.invoke(shell, options, function (err) {
+                            if (err) shell.error(err);
                             shell.emit('done');
-                            break;
-                    }
+                        });
+                    } else
+                        // Invoke is not asynchronous so do not pass in a callback.
+                        cmd.invoke(shell, options);
                 } catch (err) {
                     shell.error(err);
                 }
-            } else
-                shell.emit('done');
-        }
-        else
+            }
+        } else
             shell.log('"' + cmdName + '" is not a valid command', { type: 'error' });
-    }
-    else {
+    } else {
         // If prompt exists then cancel it...
         if (prompt){
             shell.log('prompt canceled', { type: 'warn' });
@@ -104,9 +98,9 @@ module.exports = exports = function (cmdStr, contextData, options) {
         // ...otherwise inform user there is no active prompt.
         else
             shell.log('there are no active prompts', { type: 'warn' });
-
     }
 
-
+    // Emit a done event if the command was not asynchronous.
+    if (!asyncCmd) shell.emit('done');
     return shell;
 };
