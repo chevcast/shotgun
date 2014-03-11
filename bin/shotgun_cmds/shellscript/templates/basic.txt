@@ -27,7 +27,6 @@ args.splice(0, 2);
 // Create a command string from the rest of the input.
 var cmdStr = args.join(' ');
 
-// This gets set to true if the script wants to prompt the user for a value.
 var isPrompt = false;
 
 // Handle shell events.
@@ -40,13 +39,11 @@ shell
     .on('log', function (text, options) {
         console.log(text);
     })
-    .on('contextChanged', function (context) {
-        // If a prompt is set then set isPrompt to true.
-        isPrompt = context.hasOwnProperty('prompt');
-    })
-    .on('done', function () {
+    .on('done', function (isPrompt) {
+        // isPrompt gets set to true if the script wants to prompt the user for a value.
+        // If shotgun does not want to begin a prompt then don't start a readline prompt.
+        // Since this is a shell script just drop the user back to the command line.
         if (!isPrompt) return;
-        
         // The script has finished parsing the command string but needs additional
         // data. Start a readline prompt and pipe the user input back into shotgun.
         isPrompt = false;

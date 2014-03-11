@@ -17,8 +17,6 @@ var args = process.argv;
 args.splice(0, 2);
 var cmdStr = args.join(' ');
 
-var isPrompt = false;
-
 shell
     .on('error', console.error.bind(console))
     .on('clear', function () {
@@ -27,13 +25,8 @@ shell
     .on('log', function (text, options) {
         console.log(text);
     })
-    .on('contextChanged', function (context) {
-        isPrompt = context.hasOwnProperty('prompt');
-    })
-    .on('done', function () {
+    .on('done', function (isPrompt) {
         if (!isPrompt) return;
-        
-        isPrompt = false;
         var rl = readline.createInterface(process.stdin, process.stdout);
         rl.on('line', function (userInput) {
             rl.close();
