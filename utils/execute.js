@@ -81,7 +81,7 @@ module.exports = exports = function (cmdStr, contextData, options) {
                         // the done event when it is called.
                         cmd.invoke(shell, options, function (err) {
                             if (err) shell.error(err);
-                            shell.emit('done', shell.context.getVar('prompt'));
+                            shell.emit('done', prompt);
                         });
                     } else
                         // Invoke is not asynchronous so do not pass in a callback.
@@ -104,6 +104,6 @@ module.exports = exports = function (cmdStr, contextData, options) {
     }
 
     // Emit a done event if the command was not asynchronous.
-    if (!asyncCmd) shell.emit('done', shell.context.getVar('prompt'));
+    if (!asyncCmd) shell.emit('done', prompt);
     return shell;
 };
