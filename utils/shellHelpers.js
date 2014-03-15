@@ -70,13 +70,12 @@ exports.loadHelpers = function (shell) {
     };
 
     shell.setPrompt = function(key, cmdName, options, msg) {
-        var prompt = {
+        return shell.context.setVar('prompt', {
             option: key,
             cmd: cmdName,
             options: options,
             msg: msg || key
-        };
-        return shell.context.setVar('prompt', prompt);
+        });
     };
 
     shell.clearPrompt = function () {
