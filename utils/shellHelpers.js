@@ -49,22 +49,23 @@ exports.loadHelpers = function (shell) {
     shell.context = {
         data: {},
         setVar: function (name, value) {
+            var operation = this.data.hasOwnProperty(name) ? 'update' : 'add';
+            this.data[name] = value;
             shell.emit('contextChanged', this.data, {
-                operation: this.data.hasOwnProperty(name) ? 'update' : 'add',
+                operation: operation,
                 name: name,
                 value: value
             });
-            this.data[name] = value;
         },
         getVar: function (name, callback) {
             return this.data[name];
         },
         delVar: function (name) {
+            delete this.data[name];
             shell.emit('contextChanged', this.data, {
                 operation: 'delete',
                 name: name,
             });
-            delete this.data[name];
         }
     };
 
